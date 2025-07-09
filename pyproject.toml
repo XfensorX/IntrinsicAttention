@@ -8,15 +8,14 @@ description = "Analysis of intrinsic reward generated on full trajectories with 
 authors = [{ name = "Philipp W. Link", email = "p.link@stud.uni-hannover.de" }, {name = "Julius Heidmann", email = "julius.heidmann@stud.uni-hannover.de"}, {name = "K. Luan A. Liebig-Schultz", email = "luan.liebig-schultz@stud.uni-hannover.de"}]
 readme = "README.md"
 requires-python = "~=3.11"
-license = { file = "LICENSE" }
 keywords = [
   "Reinforcement Learning",
   "Attention"
 ]
 
 dependencies = [
-  "numpy",
-  "gymnasium[box2d]",
+  "numpy<2.0",
+  "gymnasium",
   "torch",
   "tqdm",
   "matplotlib",
@@ -32,8 +31,9 @@ dependencies = [
   "hydra-colorlog",
   "moviepy",
   "rliable",
-  "ray[rllib]",
+  "ray[default]",
   "hypersweeper",
+  "setuptools<81"
 ]
 
 [project.optional-dependencies]
@@ -48,7 +48,7 @@ dev = ["pytest>=4.6",
 [tool.isort]
 py_version = "38"
 profile = "black" # Play nicely with black
-src_paths = ["rlsolutions", "tests"]
+src_paths = ["configs", "source", "tests"]
 known_types = ["typing", "abc"] # We put these in their own section "types"
 known_test = ["tests"]
 known_first_party = ["rlsolutions"]
