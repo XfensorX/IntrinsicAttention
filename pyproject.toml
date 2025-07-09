@@ -1,0 +1,92 @@
+# For TOML reference
+# https://learnxinyminutes.com/docs/toml/
+
+[project]
+name = "IntrinsicAttention"
+version = "2025"
+description = "Analysis of intrinsic reward generated on full trajectories with attention based model in Reinforcement Learning"
+authors = [{ name = "Philipp W. Link", email = "p.link@stud.uni-hannover.de" }, {name = "Julius Heidmann", email = "julius.heidmann@stud.uni-hannover.de"}, {name = "K. Luan A. Liebig-Schultz", email = "luan.liebig-schultz@stud.uni-hannover.de"}]
+readme = "README.md"
+requires-python = "~=3.11"
+license = { file = "LICENSE" }
+keywords = [
+  "Reinforcement Learning",
+  "Attention"
+]
+
+dependencies = [
+  "numpy",
+  "gymnasium[box2d]",
+  "torch",
+  "tqdm",
+  "matplotlib",
+  "minigrid",
+  "seaborn",
+  "pandas",
+  "rich",
+  "jupyterlab",
+  "tensorboard",
+  "hydra-core",
+  "hydra-submitit-launcher",
+  "hydra-ray-launcher",
+  "hydra-colorlog",
+  "moviepy",
+  "rliable",
+  "ray[rllib]",
+  "hypersweeper",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=4.6",
+        "pytest-cov",
+        "pytest-xdist",
+        "pytest-timeout",
+        "ruff",
+        "pre-commit",
+        "isort"]
+
+[tool.isort]
+py_version = "38"
+profile = "black" # Play nicely with black
+src_paths = ["rlsolutions", "tests"]
+known_types = ["typing", "abc"] # We put these in their own section "types"
+known_test = ["tests"]
+known_first_party = ["rlsolutions"]
+sections = [
+    "FUTURE",
+    "TYPES",
+    "STDLIB",
+    "THIRDPARTY",
+    "FIRSTPARTY",
+    "TEST",
+    "LOCALFOLDER",
+] # section ordering
+multi_line_output = 3 # https://pycqa.github.io/isort/docs/configuration/multi_line_output_modes.html
+
+[tool.pydocstyle]
+convention = "numpy"
+add-ignore = [ # http://www.pydocstyle.org/en/stable/error_codes.html
+    "D100", # Missing docstring in public module
+    "D101", # Missing docstring in public class
+    "D104", # Missing docstring in public package
+    "D105", # Missing docstring in magic method
+    "D203", # 1 blank line required before class docstring
+    "D205", # 1 blank line required between summary and description
+    "D210", # No whitespaces allowed surrounding docstring text
+    "D212", # Multi-line docstring summary should start at the first line
+    "D213", # Multi-line docstring summary should start at the second line
+    "D400", # First line should end with a period
+    "D401", # First line should be in imperative mood
+    "D404", # First word of docstring should not be this
+    "D413", # Missing blank line after last section
+    "D415", # First line should end with a period, question mark, or exclamation point
+]
+
+[tool.ruff]
+extend-exclude = []
+
+[tool.ruff.lint]
+ignore = [
+  # Conflicts with the formatter
+  "COM812", "ISC001"
+]
