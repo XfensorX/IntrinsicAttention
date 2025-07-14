@@ -1,9 +1,7 @@
-from ray.rllib.algorithms.ppo import PPOConfig
-from ray import tune
 import gymnasium as gym
-from minigrid.wrappers import RGBImgPartialObsWrapper, ImgObsWrapper
-from gymnasium.wrappers import FlattenObservation
-from gymnasium.wrappers import NormalizeObservation
+from gymnasium.wrappers import FilterObservation
+from ray import tune
+from ray.rllib.algorithms.ppo import PPOConfig
 
 ENV_NAME = "MiniGrid-DoorKey-5x5-v0"
 
@@ -13,27 +11,34 @@ def evaluate() -> None:
         import minigrid
 
         env = gym.make(ENV_NAME)
-        env = RGBImgPartialObsWrapper(env)
-        env = ImgObsWrapper(env)
-        env = FlattenObservation(env)
-        env = NormalizeObservation(env)
+        env = FilterObservation(env, ["direction", "image"])
         return env
 
     tune.register_env(ENV_NAME, create_env)
-
     config = PPOConfig().environment(ENV_NAME).framework("torch")
+    config = (
+        config.training(train_batch_size=4000)
+        .env_runners(
+            num_envs_per_env_runner=4, num_env_runners=1, rollout_fragment_length="auto"
+        )
+        .resources(num_gpus=0)
+    )
     config["seed"] = 42
     config["num_env_runners"] = 8
 
-    tuner = tune.Tuner(
-        "PPO",
-        param_space=config,
-        run_config=tune.RunConfig(
-            stop={"num_env_steps_sampled_lifetime": 100000},
-        ),
-    )
-
-    results = tuner.fit()
+    algo = config.build()
+    for _ in range(2):
+        result = algo.train()
+        print(result["episode_reward_mean"])
+    algo.stop()
+    # tuner = tune.Tuner(
+    #     "PPO",
+    #     param_space=config,
+    #     run_config=tune.RunConfig(
+    #         stop={"num_env_steps_sampled_lifetime": 8000},
+    #     ),
+    # )
+    # results = tuner.fit()
 
     # # Build the PPO agent
     # agent = config.build()

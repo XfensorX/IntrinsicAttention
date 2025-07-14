@@ -31,9 +31,10 @@ dependencies = [
   "hydra-colorlog",
   "moviepy",
   "rliable",
-  "ray[default]",
+  "ray[rllib]",
+  "ray[tune]",
   "hypersweeper",
-  "setuptools<81"
+  "setuptools<81",
 ]
 
 [project.optional-dependencies]
