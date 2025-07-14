@@ -1,7 +1,5 @@
-from tkinter import N
 from typing import Any, Dict, Optional
 
-from gymnasium.envs.tabular.blackjack import obs
 import numpy as np
 
 from ray.rllib.core.columns import Columns
@@ -73,10 +71,13 @@ class IntrinsicAttentionPPOModel(TorchRLModule, ValueFunctionAPI):
             output_size=pre_head_embedding_dim,
         )
 
-        self.value_head = ReluMlp([pre_head_embedding_dim, pre_head_embedding_dim, 1])
+        self.value_head = ReluMlp(
+            [pre_head_embedding_dim, pre_head_embedding_dim, 1], output_layer=None
+        )
 
         self.policy_head = ReluMlp(
-            [pre_head_embedding_dim, pre_head_embedding_dim, action_dim]
+            [pre_head_embedding_dim, pre_head_embedding_dim, action_dim],
+            output_layer=None,
         )
 
     @override(TorchRLModule)
@@ -96,6 +97,7 @@ class IntrinsicAttentionPPOModel(TorchRLModule, ValueFunctionAPI):
 
     @override(TorchRLModule)
     def _forward_train(self, batch, **kwargs):
+
         # Same logic as _forward, but also return embeddings to be used by value
         # function branch during training.
         embeddings, state_outs = self._compute_gru_embeddings_and_state_outs(batch)
