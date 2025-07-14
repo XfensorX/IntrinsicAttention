@@ -15,59 +15,8 @@ from ray.rllib.utils.typing import TensorType
 import torch
 import torch.nn as nn
 
-# For better Interpretabilty, could be more if it is not working
-NUM_HEADS = 1
-
-
-class IntrinsicAttention(nn.Module):
-    def __init__(
-        self,
-        input_dim: int,
-        v_dim: int,
-        qk_dim: int,
-    ):
-        super().__init__()
-
-        self.attention_layer = nn.MultiheadAttention(
-            embed_dim=input_dim,
-            kdim=qk_dim,
-            vdim=v_dim,
-            num_heads=NUM_HEADS,
-            batch_first=True,
-        )
-
-        self.reward_layer = nn.Sequential(
-            nn.Linear(v_dim, v_dim // 2),
-            nn.ReLU(),
-            nn.Linear(v_dim // 2, 1),
-            nn.Tanh(),
-        )
-
-    def forward(
-        self,
-        inputs: torch.Tensor,
-        need_weights: bool = False,
-    ):
-        """
-        !! Observations have to be padded to same length already
-        input_dim should be some kind of mixture of actions and observations
-
-        Args:
-            inputs (torch.Tensor): shape BATCH x max_trajectory_length x input_dim
-            actions (torch.Tensor): shape BATCH x max_trajectory_length x action_dim
-
-        Return:
-            rewards:
-                shape: BATCH x max_trajectory_length x 1
-            attn_weights: from the attn layer add the dimensions
-                shape: BATCH x max_trajectory_length x max_trajectory_length
-                 IF NEED_WEIGHTS is TRUE!!, else None
-        """
-
-        attn_out, attn_weights = self.attention_layer(inputs, need_weights=need_weights)
-        rewards = self.reward_layer(attn_out).squeeze()
-
-        return rewards, attn_weights
+from source.proposal.models.GRUBase import GRUBase
+from source.proposal.models.IntrinsicAttention import IntrinsicAttention
 
 
 class IntrinsicAttentionPPOModel(TorchRLModule, ValueFunctionAPI):
@@ -104,6 +53,7 @@ class IntrinsicAttentionPPOModel(TorchRLModule, ValueFunctionAPI):
         self._gru_hidden_size = self.model_config.get("gru_hidden_size")
 
         obs_embed_layer_hidden_size = int((obs_dim + obs_embed_dim) / 2)
+
         self.observation_embedding_layer = nn.Sequential(
             nn.Linear(obs_dim, obs_embed_layer_hidden_size),
             nn.ReLU(),
@@ -111,22 +61,19 @@ class IntrinsicAttentionPPOModel(TorchRLModule, ValueFunctionAPI):
             nn.ReLU(),
         )
 
-        input_dim = action_dim + obs_embed_dim
-
         self.intrinsic_reward_network = IntrinsicAttention(
-            input_dim=input_dim,
+            input_dim=action_dim + obs_embed_dim,
             v_dim=self.model_config.get("attention_v_dim"),
             qk_dim=self.model_config.get("attention_qk_dim"),
         )
 
-        self.gru = nn.GRU(
-            input_size=input_dim,
-            hidden_size=self._gru_hidden_size[0],
+        self.gru_base_network = GRUBase(
+            input_dim=action_dim + obs_embed_dim,
+            hidden_size=self._gru_hidden_size,
             num_layers=self.model_config.get("gru_num_layers"),
-            batch_first=True,
+            output_size=self.model_config.get("pre_head_embedding_dim"),
         )
 
-        self.gru_output_net = NotImplemented
         self.value_head = NotImplemented
         self.policy_head = NotImplemented
 

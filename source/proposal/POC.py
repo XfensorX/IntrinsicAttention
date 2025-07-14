@@ -4,7 +4,7 @@ from ray import tune
 from ray.rllib.algorithms.ppo import PPOConfig
 from ray.rllib.core.rl_module.rl_module import RLModuleSpec
 
-from .model import IntrinsicAttentionPPOModel
+from .models.model import IntrinsicAttentionPPOModel
 
 ENV_NAME = "MiniGrid-DoorKey-5x5-v0"
 
