@@ -17,6 +17,7 @@ import torch.nn as nn
 
 from source.proposal.models.GRUBase import GRUBase
 from source.proposal.models.IntrinsicAttention import IntrinsicAttention
+from source.proposal.models.ReluMlp import ReluMlp
 
 
 class IntrinsicAttentionPPOModel(TorchRLModule, ValueFunctionAPI):
@@ -47,18 +48,16 @@ class IntrinsicAttentionPPOModel(TorchRLModule, ValueFunctionAPI):
         - in_size = self.observation_space.shape[0]
         """
 
-        obs_dim = self.model_config.get("attention_obs_dim")
-        action_dim = self.model_config.get("action_dim")
-        obs_embed_dim = self.model_config.get("attention_obs_embed_dim")
+        action_dim = self.action_space.shape[0]
+
+        obs_dim = self.model_config.get("obs_dim")
+        obs_embed_dim = self.model_config.get("obs_embed_dim")
+        pre_head_embedding_dim = self.model_config.get("pre_head_embedding_dim")
+
         self._gru_hidden_size = self.model_config.get("gru_hidden_size")
 
-        obs_embed_layer_hidden_size = int((obs_dim + obs_embed_dim) / 2)
-
-        self.observation_embedding_layer = nn.Sequential(
-            nn.Linear(obs_dim, obs_embed_layer_hidden_size),
-            nn.ReLU(),
-            nn.Linear(obs_embed_layer_hidden_size, obs_embed_dim),
-            nn.ReLU(),
+        self.observation_embedding_layer = ReluMlp(
+            [obs_dim, int((obs_dim + obs_embed_dim) / 2), obs_embed_dim]
         )
 
         self.intrinsic_reward_network = IntrinsicAttention(
@@ -71,11 +70,14 @@ class IntrinsicAttentionPPOModel(TorchRLModule, ValueFunctionAPI):
             input_dim=action_dim + obs_embed_dim,
             hidden_size=self._gru_hidden_size,
             num_layers=self.model_config.get("gru_num_layers"),
-            output_size=self.model_config.get("pre_head_embedding_dim"),
+            output_size=pre_head_embedding_dim,
         )
 
-        self.value_head = NotImplemented
-        self.policy_head = NotImplemented
+        self.value_head = ReluMlp([pre_head_embedding_dim, pre_head_embedding_dim, 1])
+
+        self.policy_head = ReluMlp(
+            [pre_head_embedding_dim, pre_head_embedding_dim, action_dim]
+        )
 
     @override(TorchRLModule)
     def get_initial_state(self) -> Any:
