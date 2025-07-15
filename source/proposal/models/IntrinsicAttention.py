@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 
+from source.proposal.models.ReluMlp import ReluMlp
+
 # For better Interpretabilty, could be more if it is not working
 NUM_HEADS = 1
 
@@ -22,12 +24,7 @@ class IntrinsicAttention(nn.Module):
             batch_first=True,
         )
 
-        self.reward_layer = nn.Sequential(
-            nn.Linear(v_dim, v_dim // 2),
-            nn.ReLU(),
-            nn.Linear(v_dim // 2, 1),
-            nn.Tanh(),
-        )
+        self.reward_layer = ReluMlp([v_dim, v_dim // 2, 1], output_layer=nn.Tanh)
 
     def forward(
         self,

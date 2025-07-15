@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 
+from source.proposal.models.ReluMlp import ReluMlp
+
 
 class GRUBase(nn.Module):
     def __init__(
@@ -15,12 +17,8 @@ class GRUBase(nn.Module):
             batch_first=True,
         )
 
-        output_net_hidden_size = (hidden_size + output_size) // 2
-        self.output_net = nn.Sequential(
-            nn.Linear(hidden_size, output_net_hidden_size),
-            nn.ReLU(),
-            nn.Linear(output_net_hidden_size, output_size),
-            nn.ReLU(),
+        self.output_net = ReluMlp(
+            [hidden_size, (hidden_size + output_size) // 2, output_size]
         )
 
     def forward(self, inputs: torch.Tensor, input_states: torch.Tensor):

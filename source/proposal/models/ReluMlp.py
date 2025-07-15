@@ -1,10 +1,21 @@
+from typing import Type
+
+import torch
 from torch import nn
 
 
 class ReluMlp(nn.Module):
-    def __init__(self, sizes: list[int], output_layer: None | nn.Module = nn.ReLU):
+    def __init__(
+        self, sizes: list[int], output_layer: None | Type[nn.Module] = nn.ReLU
+    ):
+        """Simple Module for a multilayer perceptron
+
+        Args:
+            sizes (list[int]): The sizes of the layers, starting with input_size, ending with output_size
+            output_layer (None | Type[nn.Module], optional): The output-layer activation function to use. Can be None to return logits. Defaults to nn.ReLU.
+        """
         super().__init__()
-        layers = []
+        layers: list[nn.Module] = []
         for i in range(len(sizes) - 1):
             layers.append(nn.Linear(sizes[i], sizes[i + 1]))
             layers.append(nn.ReLU())
@@ -16,5 +27,5 @@ class ReluMlp(nn.Module):
 
         self.net = nn.Sequential(*layers)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         return self.net(x)
