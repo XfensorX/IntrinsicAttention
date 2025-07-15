@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING
 
+from ray.rllib.algorithms.algorithm_config import DifferentiableAlgorithmConfig
+from ray.rllib.algorithms.ppo import PPO, PPOConfig
 from ray.rllib.execution.rollout_ops import (
     synchronous_parallel_sample,
 )
@@ -15,21 +17,23 @@ from ray.rllib.utils.metrics import (
     TIMERS,
 )
 
-from ray.rllib.algorithms.ppo import PPO, PPOConfig
-
 if TYPE_CHECKING:
-    from ray.rllib.core.learner.learner import Learner
+    pass
 
 
-def IntrinsicAttentionPPO(PPO):  # TODO: This is only copied from standard PPO
-    # Significan Contributions from:
+class IntrinsicAttentionPPOConfig(PPOConfig, DifferentiableAlgorithmConfig):
+    pass
+
+
+class IntrinsicAttentionPPO(PPO):  # TODO: This is only copied from standard PPO
+    # Significant Contributions from:
     #  https://github.com/ray-project/ray/blob/master/rllib/algorithms/ppo/ppo.py line 388
 
     @override(PPO)
     def training_step(self) -> None:
         # Old API stack (Policy, RolloutWorker, Connector).
         if not self.config.enable_env_runner_and_connector_v2:
-            return self._training_step_old_api_stack()
+            raise NotImplementedError()
 
         # Collect batches from sample workers until we have a full batch.
         with self.metrics.log_time((TIMERS, ENV_RUNNER_SAMPLING_TIMER)):
