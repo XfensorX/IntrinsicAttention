@@ -35,21 +35,17 @@ install:
 	pre-commit install
 
 check:
-# TODO: change directories
-	$(RUFF) format --check rl_exercises tests
-	$(RUFF) check rl_exercises tests
+	$(RUFF) format --check source tests
+	$(RUFF) check source tests
 
 pre-commit:
 	$(PRECOMMIT) run --all-files
 
 format:
-# TODO: change directories
-#	uv run isort rl_exercises tests
-#	$(RUFF) format --silent rl_exercises tests
-#	$(RUFF) check --fix --silent rl_exercises tests --exit-zero
-#	$(RUFF) check --fix rl_exercises tests --exit-zero
-	@echo "TODO"
-
+	uv run isort source tests
+	$(RUFF) format --silent source tests
+	$(RUFF) check --fix --silent source tests --exit-zero
+	$(RUFF) check --fix source tests --exit-zero
 test:
 	$(PYTEST) ${TESTS_DIR}
 
