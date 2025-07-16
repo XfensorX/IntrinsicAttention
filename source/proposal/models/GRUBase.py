@@ -33,6 +33,6 @@ class GRUBase(nn.Module):
             # TODO: add shapes
         """
 
-        output, h = self.gru(inputs, input_states.unsqueeze(0))
+        output, h = self.gru(inputs, input_states)
         output = self.output_net(output)
         return output, h

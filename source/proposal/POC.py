@@ -30,29 +30,31 @@ def evaluate() -> None:
         .env_runners(num_envs_per_env_runner=1, num_env_runners=1)
         .rl_module(
             rl_module_spec=RLModuleSpec(
-                module_class=IntrinsicAttentionPPOModel(
-                    model_config={
-                        "obs_dim": 147,
-                        "obs_embed_dim": 16,
-                        "pre_head_embedding_dim": 64,
-                        "gru_hidden_size": 64,
-                        "gru_num_layers": 4,
-                        "attention_v_dim": 32,
-                        "attention_qk_dim": 32,
-                    },
-                    action_space=create_env(None).action_space,
-                ),
+                module_class=IntrinsicAttentionPPOModel,
+                model_config={
+                    "obs_dim": 147,
+                    "obs_embed_dim": 16,
+                    "pre_head_embedding_dim": 64,
+                    "gru_hidden_size": 16,
+                    "gru_num_layers": 1,
+                    "attention_v_dim": 32,
+                    "attention_qk_dim": 32,
+                    "max_seq_len": 250,
+                },
+                action_space=create_env(None).action_space,
+                observation_space=create_env(None).observation_space,
             ),
         )
         .training()
-        .resources(num_gpus=0)
+        .resources(num_gpus=0, num_cpus_per_worker=2)
+        .learners(num_cpus_per_learner=5)
     )
 
     tuner = tune.Tuner(
         "PPO",
         param_space=config,
         run_config=tune.RunConfig(
-            stop={"num_env_steps_sampled_lifetime": 8000},
+            stop={"num_env_steps_sampled_lifetime": 20000},
         ),
     )
     results = tuner.fit()
