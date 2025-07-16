@@ -2,7 +2,8 @@ from typing import Any, Dict, Optional
 
 import numpy as np
 
-# FIXME: torch, nn = try_import_torch()
+# from ray.rllib.utils.framework import try_import_torch
+# torch, nn = try_import_torch()
 import torch
 from ray.rllib.core.columns import Columns
 from ray.rllib.core.rl_module.apis.value_function_api import ValueFunctionAPI
@@ -28,10 +29,13 @@ class IntrinsicAttentionPPOModel(TorchRLModule, ValueFunctionAPI):
     # https://github.com/ray-project/ray/blob/master/rllib/examples/rl_modules/classes/lstm_containing_rlm.py
     @override(TorchRLModule)
     def setup(self):  # TODO: Setup models
-        action_dim = self.action_space.shape
+        # FIXME: This is a hack to make the env work with RLlib
+        if len(self.action_space.shape) == 0:
+            action_dim = 1
+        else:
+            action_dim = self.action_space.shape[0]
 
         obs_dim = self.model_config.get("obs_dim")
-        raise ValueError(action_dim, obs_dim)
         obs_embed_dim = self.model_config.get("obs_embed_dim")
         pre_head_embedding_dim = self.model_config.get("pre_head_embedding_dim")
 
@@ -118,6 +122,5 @@ class IntrinsicAttentionPPOModel(TorchRLModule, ValueFunctionAPI):
         return torch.cat([obs_embed, actions], dim=-1)
 
     def _compute_gru_embeddings_and_state_outs(self, h_in, obs_action_embedding):
-        embeddings, h = self.gru(obs_action_embedding, h_in.unsqueeze(0))
-        embeddings = self.gru_output_net(embeddings)
+        embeddings, h = self.gru_base_network(obs_action_embedding, h_in.unsqueeze(0))
         return embeddings, {"h": h.squeeze(0)}
