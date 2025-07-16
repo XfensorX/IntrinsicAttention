@@ -6,6 +6,7 @@ from ray import tune
 from ray.rllib.algorithms.ppo import PPOConfig
 from ray.rllib.core.rl_module.rl_module import RLModuleSpec
 
+from source.proposal.full_episode_connector import FullEpisodeConnector
 from source.proposal.models.model import IntrinsicAttentionPPOModel
 
 ENV_NAME = "MiniGrid-DoorKey-5x5-v0"
@@ -55,7 +56,13 @@ def evaluate() -> None:
                 observation_space=create_env(None).observation_space,
             ),
         )
-        .training(train_batch_size_per_learner=2048, num_epochs=7, minibatch_size=128)
+        .training(
+            train_batch_size_per_learner=2048,
+            num_epochs=7,
+            minibatch_size=128,
+            learner_connector=lambda observation_space,
+            action_space: FullEpisodeConnector(),
+        )
         .learners(num_cpus_per_learner=5, num_learners=1)
     )
 

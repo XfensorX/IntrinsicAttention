@@ -30,7 +30,8 @@ class GRUBase(nn.Module):
             inputs (torch.Tensor): shape BATCH x max_trajectory_length x input_dim
 
         Return:
-            # TODO: add shapes
+            # output: (batch x time x hidden_size)
+            # h: (num_layers x  batch x hidden_size)
         """
 
         output, h = self.gru(inputs, input_states)
