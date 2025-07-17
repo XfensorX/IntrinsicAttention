@@ -1,5 +1,7 @@
 from typing import Any, Dict, Optional
 
+import time
+
 import numpy as np
 from ray.rllib.core.columns import Columns
 from ray.rllib.core.rl_module.apis.value_function_api import ValueFunctionAPI
@@ -97,7 +99,25 @@ class IntrinsicAttentionPPOModel(TorchRLModule, ValueFunctionAPI):
 
     @override(TorchRLModule)
     def _forward_train(self, batch, **kwargs):
-        # episode_ids = batch[Columns.EPS_ID]
+        if not hasattr(self, "_last_print_time"):
+            self._last_print_time = 0
+        now = time.time()
+        if now - self._last_print_time > 2:
+            print(
+                f"{batch[Columns.OBS].shape=}, {batch[Columns.SEQ_LENS]=}, {torch.unique(batch[Columns.EPS_ID])=}"
+            )
+            self._last_print_time = now
+
+        # Ensure, that all steps are from one episode
+        if 0 in batch[Columns.EPS_ID]:
+            assert (
+                len(torch.unique(batch[Columns.EPS_ID]))
+                == batch[Columns.OBS].shape[0] + 1
+            )
+        else:
+            assert (
+                len(torch.unique(batch[Columns.EPS_ID])) == batch[Columns.OBS].shape[0]
+            )
 
         gru_embeddings, state_out = self._compute_gru_embeddings_and_state_outs(
             batch[Columns.STATE_IN]["h"],

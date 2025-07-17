@@ -1,7 +1,9 @@
-import torch
-import torch.nn as nn
+from ray.rllib.utils.framework import try_import_torch
 
 from source.proposal.models.ReluMlp import ReluMlp
+
+torch, nn = try_import_torch()
+
 
 # For better Interpretabilty, could be more if it is not working
 NUM_HEADS = 1

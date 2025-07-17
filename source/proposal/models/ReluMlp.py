@@ -1,7 +1,8 @@
 from typing import Type
 
-import torch
-from torch import nn
+from ray.rllib.utils.framework import try_import_torch
+
+torch, nn = try_import_torch()
 
 
 class ReluMlp(nn.Module):
