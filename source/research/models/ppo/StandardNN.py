@@ -15,9 +15,14 @@ from source.proposal.models.IntrinsicAttention import IntrinsicAttention
 from source.proposal.models.ReluMlp import ReluMlp
 
 torch, nn = try_import_torch()
+#
+#
+# THIS FILE IS COMPLETELY WRONG AND INCOMPLETE !!! REWRITE
+#
+#
 
 
-class IntrinsicAttentionPPOModel(TorchRLModule, ValueFunctionAPI):
+class StandardPPOModel(TorchRLModule, ValueFunctionAPI):
     """
     Tips:
     - use Columns.???? instead of SAMPLEBATCH.??? because this is old API (ChatGPT os often wrong)
@@ -30,6 +35,7 @@ class IntrinsicAttentionPPOModel(TorchRLModule, ValueFunctionAPI):
     # https://github.com/ray-project/ray/blob/master/rllib/examples/rl_modules/classes/lstm_containing_rlm.py
     @override(TorchRLModule)
     def setup(self):
+        self.model = self.model_config.get("neural_network")
         self.action_dim = self.action_space.n
 
         obs_dim = self.observation_space.shape[0]

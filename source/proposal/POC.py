@@ -64,7 +64,7 @@ def evaluate() -> None:
             minibatch_size=500,
             learner_connector=lambda obs, action: FullEpisodeConnector(obs, action),
         )
-        .learners(num_gpus_per_learner=1, num_learners=1)
+        .learners(num_cpus_per_learner=1, num_learners=1)
     )
 
     tuner = tune.Tuner(
