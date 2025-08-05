@@ -13,17 +13,8 @@ from ray.rllib.utils.typing import ModuleID
 class IntrinsicPPOLearner(PPOTorchLearner, TorchDifferentiableLearner):
     """PPO learner that incorporates intrinsic rewards"""
 
-    @override((PPOTorchLearner, TorchDifferentiableLearner))
-    def update(
-        self,
-        batch: Optional[MultiAgentBatch] = None,
-        batches: Optional[List[MultiAgentBatch]] = None,
-        batch_refs: Optional[List[ray.ObjectRef]] = None,
-        episodes: Optional[List[EpisodeType]] = None,
-        episodes_refs: Optional[List[ray.ObjectRef]] = None,
-        data_iterators: Optional[List[ray.data.DataIterator]] = None,
-        training_data: Optional[TrainingData] = None,
-    ) -> Dict[str, Any]:
+    @override(PPOTorchLearner)
+    def update(self, batch: Dict[str, Any]) -> Dict[str, Any]:
         """
         Main update method that handles intrinsic rewards before PPO update.
 
@@ -34,8 +25,7 @@ class IntrinsicPPOLearner(PPOTorchLearner, TorchDifferentiableLearner):
             Dictionary with update metrics.
         """
         # Track the original rewards for later use
-        if Columns.REWARDS in batch["default_policy"]:
-            self._original_rewards = batch["default_policy"][Columns.REWARDS].clone()
+        self._original_rewards = batch["default_policy"][Columns.REWARDS].clone()
 
         # Process the batch to compute intrinsic rewards (if intrinsic module exists)
         if "intrinsic_reward_module" in self.module:
@@ -43,23 +33,21 @@ class IntrinsicPPOLearner(PPOTorchLearner, TorchDifferentiableLearner):
             intrinsic_output = self.module["intrinsic_reward_module"].forward_train(
                 batch
             )
-            intrinsic_rewards = intrinsic_output.get(Columns.INTRINSIC_REWARDS, None)
+            intrinsic_rewards = intrinsic_output[Columns.INTRINSIC_REWARDS]
 
-            if intrinsic_rewards is not None:
-                # Add intrinsic rewards to the extrinsic rewards
-                intrinsic_coeff = self.config.learner_config_dict.get(
-                    "intrinsic_reward_coeff", 0.01
-                )
-                batch["default_policy"][Columns.REWARDS] += (
-                    intrinsic_coeff * intrinsic_rewards
-                )
+            # Add intrinsic rewards to the extrinsic rewards
+            intrinsic_coeff = self.config.learner_config_dict["intrinsic_reward_coeff"]
+            batch["default_policy"][Columns.REWARDS] += (
+                intrinsic_coeff * intrinsic_rewards
+            )
+        else:
+            raise NotImplementedError("No intrinsic reward module available")
 
         # Run standard PPO update with the augmented rewards
         results = super().update(batch)
 
         # Restore original rewards
-        if hasattr(self, "_original_rewards"):
-            batch["default_policy"][Columns.REWARDS] = self._original_rewards
+        batch["default_policy"][Columns.REWARDS] = self._original_rewards
 
         return results
 

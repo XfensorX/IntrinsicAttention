@@ -8,7 +8,7 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import TensorType
 
-from source.brainstorming.models.IntrinsicAttention import IntrinsicAttention
+from source.brainstorming.base_models.IntrinsicAttention import IntrinsicAttention
 
 torch, nn = try_import_torch()
 

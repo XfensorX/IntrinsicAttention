@@ -7,7 +7,9 @@ from gymnasium.wrappers import DtypeObservation, FlattenObservation
 from minigrid.wrappers import ImgObsWrapper, OneHotPartialObsWrapper
 from ray import tune
 
-from source.brainstorming.algorithm import IntrinsicAttentionPPOConfig
+from source.brainstorming.algorithm.IntrinsicAttentionPPOConfig import (
+    IntrinsicAttentionPPOConfig,
+)
 
 
 # Define environment creation function
@@ -75,14 +77,6 @@ def main():
         .resources(
             num_cpus_for_main_process=1,
             num_cpus_per_env_runner=1,
-        )
-        # Configure learner
-        .learner_config_dict(
-            {
-                "intrinsic_reward_coeff": 0.01,
-                "sparsity_weight": 0.01,
-                "entropy_weight": 0.001,
-            }
         )
     )
 

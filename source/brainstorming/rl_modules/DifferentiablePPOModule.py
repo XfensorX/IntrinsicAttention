@@ -8,13 +8,13 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import TensorType
 
-from source.brainstorming.models.GRUBase import GRUBase
-from source.brainstorming.models.ReluMlp import ReluMlp
+from source.brainstorming.base_models.GRUBase import GRUBase
+from source.brainstorming.base_models.ReluMlp import ReluMlp
 
 torch, nn = try_import_torch()
 
 
-class DifferentiableIntrinsicAttentionPPOModel(TorchRLModule, ValueFunctionAPI):
+class DifferentiablePPOModel(TorchRLModule, ValueFunctionAPI):
     """PPO model with GRU for temporal context processing"""
 
     @override(TorchRLModule)
