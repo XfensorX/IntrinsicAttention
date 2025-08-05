@@ -3,15 +3,27 @@ from typing import Any, Dict
 import torch
 from ray.rllib.algorithms.ppo.torch.ppo_torch_learner import PPOTorchLearner
 from ray.rllib.core.columns import Columns
+from ray.rllib.core.learner.torch.torch_differentiable_learner import (
+    TorchDifferentiableLearner,
+)
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.typing import ModuleID
 
 
-class IntrinsicPPOLearner(PPOTorchLearner):
+class IntrinsicPPOLearner(PPOTorchLearner, TorchDifferentiableLearner):
     """PPO learner that incorporates intrinsic rewards"""
 
-    @override(PPOTorchLearner)
-    def update(self, batch: Dict[str, Any]) -> Dict[str, Any]:
+    @override((PPOTorchLearner, TorchDifferentiableLearner))
+    def update(
+        self,
+        batch: Optional[MultiAgentBatch] = None,
+        batches: Optional[List[MultiAgentBatch]] = None,
+        batch_refs: Optional[List[ray.ObjectRef]] = None,
+        episodes: Optional[List[EpisodeType]] = None,
+        episodes_refs: Optional[List[ray.ObjectRef]] = None,
+        data_iterators: Optional[List[ray.data.DataIterator]] = None,
+        training_data: Optional[TrainingData] = None,
+    ) -> Dict[str, Any]:
         """
         Main update method that handles intrinsic rewards before PPO update.
 

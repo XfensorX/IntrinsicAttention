@@ -14,7 +14,7 @@ from source.brainstorming.models.ReluMlp import ReluMlp
 torch, nn = try_import_torch()
 
 
-class IntrinsicAttentionPPOModel(TorchRLModule, ValueFunctionAPI):
+class DifferentiableIntrinsicAttentionPPOModel(TorchRLModule, ValueFunctionAPI):
     """PPO model with GRU for temporal context processing"""
 
     @override(TorchRLModule)

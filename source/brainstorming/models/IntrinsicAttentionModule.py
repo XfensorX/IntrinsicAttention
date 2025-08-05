@@ -13,7 +13,7 @@ from source.brainstorming.models.IntrinsicAttention import IntrinsicAttention
 torch, nn = try_import_torch()
 
 
-class DifferentiableIntrinsicAttentionModule(TorchRLModule):
+class IntrinsicAttentionModule(TorchRLModule):
     """Differentiable module for intrinsic attention rewards"""
 
     @override(TorchRLModule)

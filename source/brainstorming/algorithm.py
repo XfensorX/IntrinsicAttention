@@ -22,14 +22,14 @@ from ray.rllib.utils.metrics import (
 META_LEARNER_RESULTS = "meta_learner_results"
 META_LEARNER_UPDATE_TIMER = "meta_learner_update_timer"
 
-from source.brainstorming.learners.intrinsic_meta_learner import (
-    IntrinsicAttentionMetaLearner,
-)
+# from ray.rllib.core.rl_module.multi_rl_module import MultiRLModuleSpec, MultiRLModule
+from ray.rllib.core.rl_module.rl_module import RLModuleSpec
+
 from source.brainstorming.learners.intrinsic_ppo_learner import IntrinsicPPOLearner
-from source.brainstorming.models.DifferentiableIntrinsicAttention import (
-    DifferentiableIntrinsicAttentionModule,
+from source.brainstorming.models.DifferentiablePPOModel import (
+    DifferentiableIntrinsicAttentionPPOModel,
 )
-from source.brainstorming.models.model import IntrinsicAttentionPPOModel
+from source.brainstorming.train import create_env
 
 
 class IntrinsicAttentionPPOConfig(PPOConfig, DifferentiableAlgorithmConfig):
@@ -52,27 +52,30 @@ class IntrinsicAttentionPPOConfig(PPOConfig, DifferentiableAlgorithmConfig):
             batch_mode="complete_episodes",
         )
 
-        # Configure learners
-        self.learner_class = IntrinsicPPOLearner
-        self.meta_learner_class = IntrinsicAttentionMetaLearner
+        # TODO: Set Hyperparameters
+        self.learners(
+            differentiable_learner_configs=[
+                DifferentiableLearnerConfig(learner_class=IntrinsicPPOLearner),
+            ]
+        )
 
         # Configure main PPO model
-        self.rl_module_spec = IntrinsicAttentionPPOModel
-
-        # Configure the differentiable module for intrinsic rewards
-        self.differentiable_learner_configs = [
-            DifferentiableLearnerConfig(
-                module_id="intrinsic_reward_module",
-                learner_class=None,  # Will use default differentiable learner
-                module_spec=DifferentiableIntrinsicAttentionModule,
-                optimizer_config={
-                    "_default": {
-                        "type": "adam",
-                        "lr": 0.0001,
-                    },
+        self.rl_module(
+            rl_module_spec=RLModuleSpec(
+                module_class=DifferentiableIntrinsicAttentionPPOModel,
+                model_config={
+                    "obs_embed_dim": 64,
+                    "pre_head_embedding_dim": 256,
+                    "gru_hidden_size": 256,
+                    "gru_num_layers": 2,
+                    "attention_v_dim": 32,
+                    "attention_qk_dim": 32,
+                    "max_seq_len": 251,
                 },
+                action_space=create_env(None).action_space,
+                observation_space=create_env(None).observation_space,
             ),
-        ]
+        )
 
         # Configure intrinsic reward coefficient and other meta-learning parameters
         self.learner_config_dict = {

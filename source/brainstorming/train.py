@@ -10,21 +10,25 @@ from ray import tune
 from source.brainstorming.algorithm import IntrinsicAttentionPPOConfig
 
 
+# Define environment creation function
+def create_env(config):
+    import minigrid  # noqa
+
+    # Create MiniGrid environment
+    env = gym.make("MiniGrid-DoorKey-5x5-v0")
+
+    # Apply wrappers
+    env = OneHotPartialObsWrapper(env)
+    env = ImgObsWrapper(env)
+    env = DtypeObservation(env, dtype=np.float32)
+    env = FlattenObservation(env)
+
+    return env
+
+
 def main():
     # Define environment creation function
-    def create_env(config):
-        import minigrid  # noqa
-
-        # Create MiniGrid environment
-        env = gym.make("MiniGrid-DoorKey-5x5-v0")
-
-        # Apply wrappers
-        env = OneHotPartialObsWrapper(env)
-        env = ImgObsWrapper(env)
-        env = DtypeObservation(env, dtype=np.float32)
-        env = FlattenObservation(env)
-
-        return env
+    env_creator = lambda config: create_env(config)
 
     # Register environment with Ray
     tune.register_env("MiniGrid-DoorKey-5x5-v0", create_env)
