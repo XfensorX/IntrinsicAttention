@@ -13,6 +13,8 @@ from ray.rllib.utils.metrics import (
     TIMERS,
 )
 
+from source.brainstorming.config import INTRINSIC_REWARD_MODULE_ID
+
 META_LEARNER_RESULTS = "meta_learner_results"
 META_LEARNER_UPDATE_TIMER = "meta_learner_update_timer"
 
@@ -21,6 +23,10 @@ META_LEARNER_UPDATE_TIMER = "meta_learner_update_timer"
 
 class IntrinsicAttentionPPO(PPO):
     """PPO implementation with intrinsic attention rewards and meta-gradient learning"""
+
+    # Register the algorithm with Ray's registry
+
+    # Register the algorithm
 
     @override(PPO)
     def training_step(self) -> Dict[str, Any]:
@@ -49,17 +55,16 @@ class IntrinsicAttentionPPO(PPO):
 
         # 2. Compute intrinsic rewards for the episodes
         with self._timers.timeit("intrinsic_reward_time"):
-            intrinsic_module_id = "intrinsic_reward_module"
-            if intrinsic_module_id in self.learner_group.modules:
+            if INTRINSIC_REWARD_MODULE_ID in self.learner_group.modules:
                 intrinsic_fwd = self.learner_group.modules[
-                    intrinsic_module_id
+                    INTRINSIC_REWARD_MODULE_ID
                 ].forward_train(episodes)
-                intrinsic_rewards = intrinsic_fwd.get(Columns.INTRINSIC_REWARDS)
+                intrinsic_rewards = intrinsic_fwd[Columns.INTRINSIC_REWARDS]
 
                 # Add intrinsic rewards to episodes for PPO training
-                intrinsic_coeff = self.config.learner_config_dict.get(
-                    "intrinsic_reward_coeff", 0.01
-                )
+                intrinsic_coeff = self.config.learner_config_dict[
+                    "intrinsic_reward_coeff"
+                ]
                 if ALL_MODULES in episodes and Columns.REWARDS in episodes[ALL_MODULES]:
                     episodes[ALL_MODULES][Columns.REWARDS] += (
                         intrinsic_coeff * intrinsic_rewards

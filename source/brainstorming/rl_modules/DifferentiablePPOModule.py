@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-import torch
+import numpy as np
 from ray.rllib.core.columns import Columns
 from ray.rllib.core.rl_module.apis.value_function_api import ValueFunctionAPI
 from ray.rllib.core.rl_module.torch import TorchRLModule
@@ -9,97 +9,122 @@ from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import TensorType
 
 from source.brainstorming.base_models.GRUBase import GRUBase
+from source.brainstorming.base_models.IntrinsicAttention import IntrinsicAttention
 from source.brainstorming.base_models.ReluMlp import ReluMlp
 
 torch, nn = try_import_torch()
 
 
-class DifferentiablePPOModel(TorchRLModule, ValueFunctionAPI):
-    """PPO model with GRU for temporal context processing"""
+class DifferentiablePPOModule(TorchRLModule, ValueFunctionAPI):
+    """
+    Tips:
+    - use Columns.???? instead of SAMPLEBATCH.??? because this is old API (ChatGPT os often wrong)
+    """
 
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+
+    # This class contains significant contributions from:
+    # https://github.com/ray-project/ray/blob/master/rllib/examples/rl_modules/classes/lstm_containing_rlm.py
     @override(TorchRLModule)
     def setup(self):
-        # Extract model configuration
-        obs_embed_dim = self.model_config.get("obs_embed_dim", 64)
-        hidden_size = self.model_config.get("gru_hidden_size", 256)
-        num_layers = self.model_config.get("gru_num_layers", 2)
-        pre_head_dim = self.model_config.get("pre_head_embedding_dim", 256)
+        self.action_dim = self.action_space.n
 
-        # Observation embedding
-        input_dim = self.observation_space.shape[0]
-        self.obs_embedding = ReluMlp([input_dim, obs_embed_dim * 2, obs_embed_dim])
+        obs_dim = self.observation_space.shape[0]
+        obs_embed_dim = self.model_config.get("obs_embed_dim")
+        pre_head_embedding_dim = self.model_config.get("pre_head_embedding_dim")
 
-        # GRU core
-        self.gru = GRUBase(
+        self._gru_hidden_size = self.model_config.get("gru_hidden_size")
+
+        self.observation_embedding_layer = ReluMlp(
+            [obs_dim, int((obs_dim + obs_embed_dim) / 2), obs_embed_dim]
+        )
+
+        self.intrinsic_reward_network = IntrinsicAttention(
+            input_dim=self.action_dim + obs_embed_dim,
+            v_dim=self.model_config.get("attention_v_dim"),
+            qk_dim=self.model_config.get("attention_qk_dim"),
+        )
+
+        self.gru_base_network = GRUBase(
             input_dim=obs_embed_dim,
-            hidden_size=hidden_size,
-            num_layers=num_layers,
-            output_size=pre_head_dim,
+            hidden_size=self._gru_hidden_size,
+            num_layers=self.model_config.get("gru_num_layers"),
+            output_size=pre_head_embedding_dim,
         )
 
-        # Policy head (action distribution)
-        action_shape = (
-            self.action_space.n
-            if hasattr(self.action_space, "n")
-            else self.action_space.shape[0]
-        )
-        self.policy_head = ReluMlp(
-            [pre_head_dim, pre_head_dim // 2, action_shape], output_layer=None
-        )
-
-        # Value function head
         self.value_head = ReluMlp(
-            [pre_head_dim, pre_head_dim // 2, 1], output_layer=None
+            [pre_head_embedding_dim, pre_head_embedding_dim, 1], output_layer=None
         )
 
-        # Initial state
-        self.register_state(
-            "hidden_state", lambda: torch.zeros(num_layers, 1, hidden_size)
+        self.policy_head = ReluMlp(
+            [pre_head_embedding_dim, pre_head_embedding_dim, self.action_dim],
+            output_layer=None,
         )
 
     @override(TorchRLModule)
     def get_initial_state(self) -> Any:
-        return self.get_state("hidden_state")
-
-    def _process_observations(self, observations, state, seq_lens=None):
-        # Embed observations
-        obs_embeds = self.obs_embedding(observations)
-
-        # Process through GRU
-        gru_out, new_state = self.gru(
-            obs_embeds.unsqueeze(1) if len(obs_embeds.shape) == 2 else obs_embeds, state
-        )
-
-        return gru_out.squeeze(1) if len(gru_out.shape) == 3 and gru_out.shape[
-            1
-        ] == 1 else gru_out, new_state
+        return {
+            "h": np.zeros(
+                shape=(
+                    self.model_config["gru_num_layers"],
+                    self._gru_hidden_size,
+                ),
+                dtype=np.float32,
+            )
+        }
 
     @override(TorchRLModule)
+    @torch.no_grad()
     def _forward(self, batch, **kwargs):
-        # Extract observations and state
-        observations = batch[Columns.OBS]
-        state = batch.get(Columns.STATE, self.get_state("hidden_state"))
+        """
+        :param batch: Description
+            batch[Columns.OBS].shape == (batch, time, obs_dim)
+        """
 
-        # Process through GRU
-        gru_out, new_state = self._process_observations(observations, state)
+        embeddings, state_outs = self._compute_gru_embeddings_and_state_outs(
+            batch[Columns.STATE_IN]["h"],
+            self.observation_embedding_layer(batch[Columns.OBS]),
+        )
 
-        # Get action logits and values
-        action_logits = self.policy_head(gru_out)
-        values = self.value_head(gru_out).squeeze(-1)
+        action_logits = self.policy_head(embeddings)
 
         return {
-            Columns.ACTION_DIST_INPUTS: action_logits,
-            Columns.VF_PREDS: values,
-            Columns.STATE_OUT: new_state,
+            Columns.ACTION_DIST_INPUTS: action_logits,  # this is the distribution, action sampling is done automatically
+            Columns.STATE_OUT: {"h": state_outs},
+            Columns.EMBEDDINGS: embeddings,
         }
 
     @override(TorchRLModule)
     def _forward_train(self, batch, **kwargs):
-        return self._forward(batch, **kwargs)
+        gru_embeddings, state_out = self._compute_gru_embeddings_and_state_outs(
+            batch[Columns.STATE_IN]["h"],
+            self.observation_embedding_layer(batch[Columns.OBS]),
+        )
+        action_logits = self.policy_head(gru_embeddings)
+
+        vf_preds = self.value_head(gru_embeddings).squeeze(-1)
+
+        return {
+            Columns.ACTION_DIST_INPUTS: action_logits,
+            # Columns.INTRINSIC_REWARDS: intrinsic_rewards,
+            Columns.STATE_OUT: {"h": state_out},
+            Columns.EMBEDDINGS: gru_embeddings,
+            Columns.VF_PREDS: vf_preds,
+        }
 
     @override(ValueFunctionAPI)
     def compute_values(
         self, batch: Dict[str, Any], embeddings: Optional[Any] = None
     ) -> TensorType:
-        forward_out = self.forward_train(batch)
-        return forward_out[Columns.VF_PREDS]
+        # TODO: This error was raised
+        # raise NotImplementedError()
+        if embeddings is None:
+            embeddings = batch.get(Columns.EMBEDDINGS)
+        return self.value_head(embeddings).squeeze(-1)
+
+    def _compute_gru_embeddings_and_state_outs(self, h_in, obs_action_embedding):
+        # TODO: Is this necessary? Rllib [batch, num_layers, hidden_size], GRU needs [num_layers, batch, hidden_size]
+        h_in = h_in.permute(1, 0, 2)
+        embeddings, h = self.gru_base_network(obs_action_embedding, h_in)
+        return embeddings, h.permute(1, 0, 2)  # [batch, num_layer, hidden_size]

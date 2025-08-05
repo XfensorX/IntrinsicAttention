@@ -1,7 +1,5 @@
 from typing import Any, Dict, Tuple
 
-import torch
-import torch.nn as nn
 from ray.rllib.core.columns import Columns
 from ray.rllib.core.rl_module.torch.torch_rl_module import TorchRLModule
 from ray.rllib.utils.annotations import override
