@@ -1,6 +1,10 @@
+from typing import List, Type, Union
+
 from ray.rllib.algorithms.algorithm_config import DifferentiableAlgorithmConfig
 from ray.rllib.algorithms.ppo import PPOConfig
-from ray.rllib.core import DEFAULT_MODULE_ID
+from ray.rllib.core.learner.differentiable_learner import (
+    DifferentiableLearner,
+)
 from ray.rllib.core.learner.differentiable_learner_config import (
     DifferentiableLearnerConfig,
 )
@@ -9,8 +13,8 @@ from ray.rllib.core.rl_module.multi_rl_module import MultiRLModuleSpec
 from ray.rllib.core.rl_module.rl_module import RLModuleSpec
 from ray.rllib.utils.annotations import override
 
-from source.brainstorming.algorithm import IntrinsicAttentionPPO
-from source.brainstorming.config import INTRINSIC_REWARD_MODULE_ID
+from source.brainstorming.algorithm.IntrinsicAttentionPPO import IntrinsicAttentionPPO
+from source.brainstorming.config import INTRINSIC_REWARD_MODULE_ID, PPO_AGENT_POLICY_ID
 from source.brainstorming.environments.umbrella_chain import create_env
 from source.brainstorming.learners.intrinsic_meta_learner import (
     IntrinsicAttentionMetaLearner,
@@ -58,18 +62,17 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
         )
         diff_learner_config = DifferentiableLearnerConfig(
             learner_class=IntrinsicPPOLearner,
-            minibatch_size=14,
+            # minibatch_size=251, # Learning: Do NOT set this
             lr=0.01,
             add_default_connectors_to_learner_pipeline=True,
-            policies_to_update=[DEFAULT_MODULE_ID],
-            num_total_minibatches=1,
-            num_epochs=1,
+            policies_to_update=[PPO_AGENT_POLICY_ID],
+            # num_total_minibatches=1,
+            # num_epochs=1,
         )
 
         self.learners(
             differentiable_learner_configs=[diff_learner_config],
         )
-        self._learner_class = IntrinsicAttentionMetaLearner
         self.training(
             minibatch_size=9,  # meta learner mini train betch size
             train_batch_size_per_learner=2000,
@@ -116,10 +119,15 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
             learner_only=True,
         )
 
+        # self.multi_agent(policies=[PPO_AGENT_POLICY_ID, INTRINSIC_REWARD_MODULE_ID])
+        # self.policies = {
+        #     PPO_AGENT_POLICY_ID: PolicySpec(),
+        #     INTRINSIC_REWARD_MODULE_ID: PolicySpec(),
+        # }
         self.rl_module(
             rl_module_spec=MultiRLModuleSpec(
                 rl_module_specs={
-                    DEFAULT_MODULE_ID: module_spec,
+                    PPO_AGENT_POLICY_ID: module_spec,
                     INTRINSIC_REWARD_MODULE_ID: intrinsic_reward_module_spec,
                 }
             )
@@ -127,14 +135,20 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
 
         # Configure intrinsic reward coefficient and other meta-learning parameters
         # TODO: somehow enter these values
-        # self.learner_config_dict = {
-        #     # Coefficient for intrinsic rewards
-        #     "intrinsic_reward_coeff": 0.01,
-        #     # Regularization weights
-        #     "sparsity_weight": 0.01,
-        #     "entropy_weight": 0.001,
-        # }
+        self.learner_config_dict = {
+            # Coefficient for intrinsic rewards
+            "intrinsic_reward_coeff": 0.01,
+            # Regularization weights
+            "sparsity_weight": 0.01,
+            "entropy_weight": 0.001,
+        }
 
     @override(PPOConfig)
     def get_default_learner_class(self) -> type[Learner] | str:
         return IntrinsicAttentionMetaLearner
+
+    @override(DifferentiableAlgorithmConfig)
+    def get_differentiable_learner_classes(
+        self,
+    ) -> List[Union[Type[DifferentiableLearner], str]]:
+        return [IntrinsicPPOLearner]

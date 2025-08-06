@@ -1,7 +1,5 @@
 from ray.rllib.utils.framework import try_import_torch
 
-from source.brainstorming.base_models.ReluMlp import ReluMlp
-
 torch, nn = try_import_torch()
 
 
@@ -18,15 +16,17 @@ class IntrinsicAttention(nn.Module):
     ):
         super().__init__()
 
-        self.attention_layer = nn.MultiheadAttention(
-            embed_dim=input_dim,
-            kdim=qk_dim,
-            vdim=v_dim,
-            num_heads=NUM_HEADS,
-            batch_first=True,
-        )
+        # self.attention_layer = nn.MultiheadAttention(
+        #     embed_dim=input_dim,
+        #     kdim=qk_dim,
+        #     vdim=v_dim,
+        #     num_heads=NUM_HEADS,
+        #     batch_first=True,
+        # )
 
-        self.reward_layer = ReluMlp([v_dim, v_dim // 2, 1], output_layer=nn.Tanh)
+        # self.reward_layer = ReluMlp([v_dim, v_dim // 2, 1], output_layer=nn.Tanh)
+
+        self.temp_layer = nn.Linear(input_dim, 1)
 
     def forward(
         self,
@@ -42,13 +42,15 @@ class IntrinsicAttention(nn.Module):
 
         Return:
             rewards:
-                shape: BATCH x max_trajectory_length x 1
+                shape: BATCH x max_trajectory_length
             attn_weights: from the attn layer add the dimensions
                 shape: BATCH x max_trajectory_length x max_trajectory_length
                  IF NEED_WEIGHTS is TRUE!!, else None
         """
 
-        attn_out, attn_weights = self.attention_layer(inputs, need_weights=need_weights)
-        rewards = self.reward_layer(attn_out).squeeze()
+        # attn_out, attn_weights = self.attention_layer(inputs, need_weights=need_weights)
+        # rewards = self.reward_layer(attn_out).squeeze()
 
-        return rewards, attn_weights
+        # return rewards, attn_weights
+
+        return self.temp_layer(inputs).squeeze(-1), None

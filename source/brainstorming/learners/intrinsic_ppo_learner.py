@@ -1,12 +1,14 @@
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 
-import torch
+from ray.rllib.algorithms import AlgorithmConfig
 from ray.rllib.algorithms.ppo.torch.ppo_torch_learner import PPOTorchLearner
 from ray.rllib.core.learner.torch.torch_differentiable_learner import (
     TorchDifferentiableLearner,
 )
 from ray.rllib.utils.annotations import override
-from ray.rllib.utils.typing import ModuleID
+from ray.rllib.utils.typing import ModuleID, TensorType
+
+from source.brainstorming.algorithm.IntrinsicAttentionPPO import TrainingData
 
 
 class IntrinsicPPOLearner(
@@ -16,10 +18,10 @@ class IntrinsicPPOLearner(
 
     @override(TorchDifferentiableLearner)
     def build(self, device) -> None:
-        """Build the meta-learner with a proper connector pipeline."""
         # Initialize the base learner
         super().build(device=device)
-        print(f"{self._learner_connector=}")
+        PPOTorchLearner.build(self)
+        print(f"PPO Learner {self._learner_connector=}")
 
     # @override(TorchDifferentiableLearner)
     # def update(
@@ -65,13 +67,42 @@ class IntrinsicPPOLearner(
 
     #     return results
 
-    @override(PPOTorchLearner)
+    @override(TorchDifferentiableLearner)
     def compute_loss_for_module(
-        self, *, module_id: ModuleID, batch: Dict[str, Any], fwd_out: Dict[str, Any]
-    ) -> torch.Tensor:
-        """Compute the standard PPO loss (intrinsic rewards have already been added)"""
-        return super().compute_loss_for_module(
-            module_id=module_id, batch=batch, fwd_out=fwd_out
+        self,
+        *,
+        module_id: ModuleID,
+        config: AlgorithmConfig,
+        batch: Dict[ModuleID, Any],
+        fwd_out: Dict[ModuleID, Any],
+    ) -> TensorType:
+        print(f"IntrinsicPPOLearner {batch=}")
+        return PPOTorchLearner.compute_loss_for_module(
+            self, module_id=module_id, config=config, batch=batch, fwd_out=fwd_out
+        )
+
+    @override(TorchDifferentiableLearner)
+    def _update(
+        self,
+        batch: Dict[ModuleID, Any],
+        params: Dict[ModuleID, Dict[ModuleID, Any | Any]],
+    ) -> Tuple[Any, Dict[str, Dict[str, Any]], Any, Any]:
+        print(f"_update: {batch=}")
+        return super()._update(batch, params)
+
+    @override(TorchDifferentiableLearner)
+    def update(
+        self,
+        params: Dict[ModuleID, Dict[ModuleID, Any | Any]],
+        training_data: TrainingData,
+        *,
+        _no_metrics_reduce: bool = False,
+        **kwargs,
+    ) -> Tuple[Dict[ModuleID, Dict[ModuleID, Any | Any]] | Dict]:
+        print(f"update: {training_data=}")
+
+        return super().update(
+            params, training_data, _no_metrics_reduce=_no_metrics_reduce, **kwargs
         )
 
 

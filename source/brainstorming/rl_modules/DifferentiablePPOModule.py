@@ -9,7 +9,6 @@ from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import TensorType
 
 from source.brainstorming.base_models.GRUBase import GRUBase
-from source.brainstorming.base_models.IntrinsicAttention import IntrinsicAttention
 from source.brainstorming.base_models.ReluMlp import ReluMlp
 
 torch, nn = try_import_torch()
@@ -38,12 +37,6 @@ class DifferentiablePPOModule(TorchRLModule, ValueFunctionAPI):
 
         self.observation_embedding_layer = ReluMlp(
             [obs_dim, int((obs_dim + obs_embed_dim) / 2), obs_embed_dim]
-        )
-
-        self.intrinsic_reward_network = IntrinsicAttention(
-            input_dim=self.action_dim + obs_embed_dim,
-            v_dim=self.model_config.get("attention_v_dim"),
-            qk_dim=self.model_config.get("attention_qk_dim"),
         )
 
         self.gru_base_network = GRUBase(
@@ -88,7 +81,11 @@ class DifferentiablePPOModule(TorchRLModule, ValueFunctionAPI):
 
         action_logits = self.policy_head(embeddings)
 
+        # TODO: Remove in _forward, only in train
+        vf_preds = self.value_head(embeddings).squeeze(-1)
+
         return {
+            Columns.VF_PREDS: vf_preds,
             Columns.ACTION_DIST_INPUTS: action_logits,  # this is the distribution, action sampling is done automatically
             Columns.STATE_OUT: {"h": state_outs},
             Columns.EMBEDDINGS: embeddings,
@@ -96,7 +93,7 @@ class DifferentiablePPOModule(TorchRLModule, ValueFunctionAPI):
 
     @override(TorchRLModule)
     def _forward_train(self, batch, **kwargs):
-        print(f"{batch.keys()=}")
+        # print(f"{batch.keys()=}")
         gru_embeddings, state_out = self._compute_gru_embeddings_and_state_outs(
             batch[Columns.STATE_IN]["h"],
             self.observation_embedding_layer(batch[Columns.OBS]),
@@ -107,7 +104,6 @@ class DifferentiablePPOModule(TorchRLModule, ValueFunctionAPI):
 
         return {
             Columns.ACTION_DIST_INPUTS: action_logits,
-            # Columns.INTRINSIC_REWARDS: intrinsic_rewards,
             Columns.STATE_OUT: {"h": state_out},
             Columns.EMBEDDINGS: gru_embeddings,
             Columns.VF_PREDS: vf_preds,

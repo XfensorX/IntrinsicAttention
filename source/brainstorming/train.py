@@ -1,9 +1,6 @@
-import os
-
 import ray
 from ray import tune
 
-from source.brainstorming.algorithm import IntrinsicAttentionPPO
 from source.brainstorming.algorithm.IntrinsicAttentionPPOConfig import (
     IntrinsicAttentionPPOConfig,
 )
@@ -18,35 +15,34 @@ def main():
 
     # Initialize Ray
     ray.init()
-
+    config = IntrinsicAttentionPPOConfig()
     # Configure the algorithm
-    config = (
-        IntrinsicAttentionPPOConfig().environment("Umbrella")
-        # Hardware resources
-        # .resources(
-        #     num_cpus_for_main_process=1,
-        #     num_cpus_per_env_runner=1,
-        # )
-    )
+    config.environment("Umbrella")
+    # Hardware resources
+    # .resources(
+    #     num_cpus_for_main_process=1,
+    #     num_cpus_per_env_runner=1,
+    # )
     # Run training
-    import pprint
 
-    pprint.pprint(config.to_dict())
-    tune.register_trainable("IntrinsicAttentionPPO", IntrinsicAttentionPPO)
-    tuner = tune.Tuner(
-        trainable=IntrinsicAttentionPPO,
-        param_space=config.to_dict(),
-        run_config=tune.RunConfig(
-            stop={"training_iteration": 20},
-            checkpoint_config=tune.CheckpointConfig(
-                checkpoint_frequency=10,
-            ),
-            storage_path=os.path.join(os.path.dirname(__file__), "results"),
-        ),
-    )
-    results = tuner.fit()
+    algo = config.build()
 
-    return results
+    return algo.train()
+
+    # tuner = tune.Tuner(
+    #     trainable=IntrinsicAttentionPPO,
+    #     param_space=config.build(),
+    #     run_config=tune.RunConfig(
+    #         stop={"training_iteration": 20},
+    #         checkpoint_config=tune.CheckpointConfig(
+    #             checkpoint_frequency=10,
+    #         ),
+    #         storage_path=os.path.join(os.path.dirname(__file__), "results"),
+    #     ),
+    # )
+    # results = tuner.fit()
+
+    # return results
 
 
 if __name__ == "__main__":

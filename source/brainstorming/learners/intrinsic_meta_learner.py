@@ -1,13 +1,14 @@
 from typing import Any, Dict, List, Optional
 
 import torch
+from ray.rllib.algorithms.ppo.torch.ppo_torch_learner import PPOTorchLearner
 from ray.rllib.core import DEFAULT_POLICY_ID
 from ray.rllib.core.learner.torch.torch_meta_learner import TorchMetaLearner
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.typing import ModuleID
 
 
-class IntrinsicAttentionMetaLearner(TorchMetaLearner):
+class IntrinsicAttentionMetaLearner(TorchMetaLearner, PPOTorchLearner):
     """Meta-learner for updating the intrinsic reward network"""
 
     @override(TorchMetaLearner)
@@ -15,8 +16,8 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner):
         """Build the meta-learner with a proper connector pipeline."""
         # Initialize the base learner
         super().build()
-
-        print(f"{self._learner_connector=}")
+        PPOTorchLearner.build(self)
+        print(f"Meta Learner: {self._learner_connector=}")
 
     @override(TorchMetaLearner)
     def compute_loss_for_module(
@@ -48,6 +49,7 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner):
 
         # Meta-objective: minimize PPO loss
         meta_loss = ppo_loss  # !! TODO: Eventually just use extrinsic reward here
+        raise NotImplementedError()
 
         # TODO:  maybe we need this later:
 

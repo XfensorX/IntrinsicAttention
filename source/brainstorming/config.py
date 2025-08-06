@@ -1,1 +1,6 @@
+from ray.rllib.core import DEFAULT_POLICY_ID
+
 INTRINSIC_REWARD_MODULE_ID = "intrinsic_reward_module"
+# INTRINSIC_REWARD_MODULE_ID = DEFAULT_POLICY_ID
+# PPO_AGENT_POLICY_ID = "custom_ppo_module_id"
+PPO_AGENT_POLICY_ID = DEFAULT_POLICY_ID
