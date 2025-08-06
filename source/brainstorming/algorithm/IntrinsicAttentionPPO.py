@@ -1,5 +1,3 @@
-from typing import Any, Dict
-
 import torch
 from ray.rllib.algorithms.ppo import PPO
 from ray.rllib.core.columns import Columns
@@ -8,8 +6,6 @@ from ray.rllib.core.columns import Columns
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.metrics import (
     ALL_MODULES,
-    ENV_RUNNER_RESULTS,
-    LEARNER_RESULTS,
     TIMERS,
 )
 
@@ -29,7 +25,7 @@ class IntrinsicAttentionPPO(PPO):
     # Register the algorithm
 
     @override(PPO)
-    def training_step(self) -> Dict[str, Any]:
+    def training_step(self) -> None:
         """
         Perform one training iteration with meta-gradient learning.
 
@@ -81,12 +77,10 @@ class IntrinsicAttentionPPO(PPO):
                 original_episodes,
                 others_training_data=[learner_results],
             )
-
+        print(f"{meta_results=}")
         # 5. Combine and return results
-        results = {
-            ENV_RUNNER_RESULTS: env_runner_results,
-            LEARNER_RESULTS: learner_results,
-            META_LEARNER_RESULTS: meta_results,
-        }
-
-        return results
+        # results = {
+        #     ENV_RUNNER_RESULTS: env_runner_results,
+        #     LEARNER_RESULTS: learner_results,
+        #     META_LEARNER_RESULTS: meta_results,
+        # }

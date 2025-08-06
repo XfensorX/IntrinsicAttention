@@ -2,8 +2,8 @@ import os
 
 import ray
 from ray import tune
-from ray.rllib.algorithms import PPO
 
+from source.brainstorming.algorithm import IntrinsicAttentionPPO
 from source.brainstorming.algorithm.IntrinsicAttentionPPOConfig import (
     IntrinsicAttentionPPOConfig,
 )
@@ -29,8 +29,12 @@ def main():
         # )
     )
     # Run training
+    import pprint
+
+    pprint.pprint(config.to_dict())
+    tune.register_trainable("IntrinsicAttentionPPO", IntrinsicAttentionPPO)
     tuner = tune.Tuner(
-        trainable=PPO,
+        trainable=IntrinsicAttentionPPO,
         param_space=config.to_dict(),
         run_config=tune.RunConfig(
             stop={"training_iteration": 20},

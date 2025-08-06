@@ -81,7 +81,6 @@ class DifferentiablePPOModule(TorchRLModule, ValueFunctionAPI):
         :param batch: Description
             batch[Columns.OBS].shape == (batch, time, obs_dim)
         """
-
         embeddings, state_outs = self._compute_gru_embeddings_and_state_outs(
             batch[Columns.STATE_IN]["h"],
             self.observation_embedding_layer(batch[Columns.OBS]),
@@ -97,6 +96,7 @@ class DifferentiablePPOModule(TorchRLModule, ValueFunctionAPI):
 
     @override(TorchRLModule)
     def _forward_train(self, batch, **kwargs):
+        print(f"{batch.keys()=}")
         gru_embeddings, state_out = self._compute_gru_embeddings_and_state_outs(
             batch[Columns.STATE_IN]["h"],
             self.observation_embedding_layer(batch[Columns.OBS]),

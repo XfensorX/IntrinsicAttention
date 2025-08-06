@@ -11,6 +11,14 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner):
     """Meta-learner for updating the intrinsic reward network"""
 
     @override(TorchMetaLearner)
+    def build(self) -> None:
+        """Build the meta-learner with a proper connector pipeline."""
+        # Initialize the base learner
+        super().build()
+
+        print(f"{self._learner_connector=}")
+
+    @override(TorchMetaLearner)
     def compute_loss_for_module(
         self,
         *,

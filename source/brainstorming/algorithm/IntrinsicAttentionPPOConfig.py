@@ -1,4 +1,3 @@
-from ray.rllib.algorithms import PPO
 from ray.rllib.algorithms.algorithm_config import DifferentiableAlgorithmConfig
 from ray.rllib.algorithms.ppo import PPOConfig
 from ray.rllib.core import DEFAULT_MODULE_ID
@@ -10,6 +9,7 @@ from ray.rllib.core.rl_module.multi_rl_module import MultiRLModuleSpec
 from ray.rllib.core.rl_module.rl_module import RLModuleSpec
 from ray.rllib.utils.annotations import override
 
+from source.brainstorming.algorithm import IntrinsicAttentionPPO
 from source.brainstorming.config import INTRINSIC_REWARD_MODULE_ID
 from source.brainstorming.environments.umbrella_chain import create_env
 from source.brainstorming.learners.intrinsic_meta_learner import (
@@ -24,13 +24,21 @@ from source.brainstorming.rl_modules.IntrinsicAttentionModule import (
 )
 
 
-class IntrinsicAttentionPPOConfig(PPOConfig, DifferentiableAlgorithmConfig):
+class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
     """Configuration for PPO with intrinsic attention rewards"""
+
+    # TODO: Noch etwas lost hier alles
 
     def __init__(self, algo_class=None):
         PPOConfig.__init__(
-            self, algo_class=algo_class or PPO
+            self, algo_class=algo_class or IntrinsicAttentionPPO
         )  # FIXME: was intrinsicattention PPO
+
+        DifferentiableAlgorithmConfig.__init__(
+            self,
+            algo_class=algo_class
+            or IntrinsicAttentionPPO,  # FIXME: does this have to change?
+        )
 
         # Make sure we're using the new API stack
         self.api_stack(
@@ -52,17 +60,22 @@ class IntrinsicAttentionPPOConfig(PPOConfig, DifferentiableAlgorithmConfig):
             learner_class=IntrinsicPPOLearner,
             minibatch_size=14,
             lr=0.01,
+            add_default_connectors_to_learner_pipeline=True,
+            policies_to_update=[DEFAULT_MODULE_ID],
+            num_total_minibatches=1,
+            num_epochs=1,
         )
 
         self.learners(
             differentiable_learner_configs=[diff_learner_config],
         )
-
+        self._learner_class = IntrinsicAttentionMetaLearner
         self.training(
             minibatch_size=9,  # meta learner mini train betch size
             train_batch_size_per_learner=2000,
             # sgd_minibatch_size=128,
-            num_sgd_iter=10,
+            # num_sgd_iter=10,
+            num_epochs=10,
             lr=0.0003,
             gamma=0.99,
             lambda_=0.95,
@@ -113,13 +126,14 @@ class IntrinsicAttentionPPOConfig(PPOConfig, DifferentiableAlgorithmConfig):
         )
 
         # Configure intrinsic reward coefficient and other meta-learning parameters
-        self.learner_config_dict = {
-            # Coefficient for intrinsic rewards
-            "intrinsic_reward_coeff": 0.01,
-            # Regularization weights
-            "sparsity_weight": 0.01,
-            "entropy_weight": 0.001,
-        }
+        # TODO: somehow enter these values
+        # self.learner_config_dict = {
+        #     # Coefficient for intrinsic rewards
+        #     "intrinsic_reward_coeff": 0.01,
+        #     # Regularization weights
+        #     "sparsity_weight": 0.01,
+        #     "entropy_weight": 0.001,
+        # }
 
     @override(PPOConfig)
     def get_default_learner_class(self) -> type[Learner] | str:
