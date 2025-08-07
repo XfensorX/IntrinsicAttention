@@ -74,7 +74,7 @@ class UmbrellaChainEnv(gym.Env):
             low=0.0,
             high=1.0,
             shape=(obs_dim,),
-            dtype=np.float64,
+            dtype=np.float32,
         )
         self.action_space = spaces.Discrete(2)  # {0, 1}
 
