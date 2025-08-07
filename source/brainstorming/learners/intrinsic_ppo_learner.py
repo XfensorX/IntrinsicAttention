@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 from ray.rllib.algorithms import AlgorithmConfig
 from ray.rllib.algorithms.ppo.torch.ppo_torch_learner import PPOTorchLearner
@@ -8,7 +8,7 @@ from ray.rllib.core.learner.torch.torch_differentiable_learner import (
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.typing import ModuleID, TensorType
 
-from source.brainstorming.algorithm.IntrinsicAttentionPPO import TrainingData
+from source.brainstorming.config import INTRINSIC_REWARD_MODULE_ID, PPO_AGENT_POLICY_ID
 
 
 class IntrinsicPPOLearner(
@@ -20,8 +20,9 @@ class IntrinsicPPOLearner(
     def build(self, device) -> None:
         # Initialize the base learner
         super().build(device=device)
-        PPOTorchLearner.build(self)
-        print(f"PPO Learner {self._learner_connector=}")
+        PPOTorchLearner.build(
+            self
+        )  # as rllib forgot to call super.build() in Differential learner
 
     # @override(TorchDifferentiableLearner)
     # def update(
@@ -76,34 +77,39 @@ class IntrinsicPPOLearner(
         batch: Dict[ModuleID, Any],
         fwd_out: Dict[ModuleID, Any],
     ) -> TensorType:
-        print(f"IntrinsicPPOLearner {batch=}")
-        return PPOTorchLearner.compute_loss_for_module(
-            self, module_id=module_id, config=config, batch=batch, fwd_out=fwd_out
-        )
+        if module_id == PPO_AGENT_POLICY_ID:
+            return PPOTorchLearner.compute_loss_for_module(
+                self, module_id=module_id, config=config, batch=batch, fwd_out=fwd_out
+            )
+        elif module_id == INTRINSIC_REWARD_MODULE_ID:
+            return 0  # TODO: do we need a loss here actually? And if yes, which one? (PPO LOss does not make sense for intrinsic reward network)
+        else:
+            raise NotImplementedError("Do not know the used module_id: ", module_id)
 
-    @override(TorchDifferentiableLearner)
-    def _update(
-        self,
-        batch: Dict[ModuleID, Any],
-        params: Dict[ModuleID, Dict[ModuleID, Any | Any]],
-    ) -> Tuple[Any, Dict[str, Dict[str, Any]], Any, Any]:
-        print(f"_update: {batch=}")
-        return super()._update(batch, params)
+    # @override(TorchDifferentiableLearner)
+    # def _update(
+    #     self,
+    #     batch: Dict[ModuleID, Any],
+    #     params: Dict[ModuleID, Dict[ModuleID, Any | Any]],
+    # ) -> Tuple[Any, Dict[str, Dict[str, Any]], Any, Any]:
+    #     print(f"IntrinsicPPOLearner _update: {batch=}")
+    #
+    #     return super()._update(batch, params)
 
-    @override(TorchDifferentiableLearner)
-    def update(
-        self,
-        params: Dict[ModuleID, Dict[ModuleID, Any | Any]],
-        training_data: TrainingData,
-        *,
-        _no_metrics_reduce: bool = False,
-        **kwargs,
-    ) -> Tuple[Dict[ModuleID, Dict[ModuleID, Any | Any]] | Dict]:
-        print(f"update: {training_data=}")
-
-        return super().update(
-            params, training_data, _no_metrics_reduce=_no_metrics_reduce, **kwargs
-        )
+    # @override(DifferentiableLearner)
+    # def update(
+    #     self,
+    #     params: Dict[ModuleID, Dict[ModuleID, Any | Any]],
+    #     training_data: TrainingData,
+    #     *,
+    #     _no_metrics_reduce: bool = False,
+    #     **kwargs,
+    # ) -> Tuple[Dict[ModuleID, Dict[ModuleID, Any | Any]] | Dict]:
+    #     print(f"IntrinsicPPOLearner update: {training_data=}")
+    #
+    #     return super().update(
+    #         params, training_data, _no_metrics_reduce=_no_metrics_reduce, **kwargs
+    #     )
 
 
 # TODO: we can postprocess the gradients here

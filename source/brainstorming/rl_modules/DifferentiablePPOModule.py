@@ -20,9 +20,6 @@ class DifferentiablePPOModule(TorchRLModule, ValueFunctionAPI):
     - use Columns.???? instead of SAMPLEBATCH.??? because this is old API (ChatGPT os often wrong)
     """
 
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-
     # This class contains significant contributions from:
     # https://github.com/ray-project/ray/blob/master/rllib/examples/rl_modules/classes/lstm_containing_rlm.py
     @override(TorchRLModule)
@@ -81,32 +78,25 @@ class DifferentiablePPOModule(TorchRLModule, ValueFunctionAPI):
 
         action_logits = self.policy_head(embeddings)
 
-        # TODO: Remove in _forward, only in train
-        vf_preds = self.value_head(embeddings).squeeze(-1)
-
         return {
-            Columns.VF_PREDS: vf_preds,
-            Columns.ACTION_DIST_INPUTS: action_logits,  # this is the distribution, action sampling is done automatically
+            Columns.ACTION_DIST_INPUTS: action_logits,
+            # this is the distribution, action sampling is done automatically
             Columns.STATE_OUT: {"h": state_outs},
             Columns.EMBEDDINGS: embeddings,
         }
 
     @override(TorchRLModule)
     def _forward_train(self, batch, **kwargs):
-        # print(f"{batch.keys()=}")
         gru_embeddings, state_out = self._compute_gru_embeddings_and_state_outs(
             batch[Columns.STATE_IN]["h"],
             self.observation_embedding_layer(batch[Columns.OBS]),
         )
         action_logits = self.policy_head(gru_embeddings)
 
-        vf_preds = self.value_head(gru_embeddings).squeeze(-1)
-
         return {
             Columns.ACTION_DIST_INPUTS: action_logits,
             Columns.STATE_OUT: {"h": state_out},
             Columns.EMBEDDINGS: gru_embeddings,
-            Columns.VF_PREDS: vf_preds,
         }
 
     @override(ValueFunctionAPI)

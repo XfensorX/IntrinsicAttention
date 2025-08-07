@@ -1,11 +1,14 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import torch
+from ray.rllib.algorithms.algorithm_config import AlgorithmConfig
 from ray.rllib.algorithms.ppo.torch.ppo_torch_learner import PPOTorchLearner
 from ray.rllib.core import DEFAULT_POLICY_ID
 from ray.rllib.core.learner.torch.torch_meta_learner import TorchMetaLearner
 from ray.rllib.utils.annotations import override
-from ray.rllib.utils.typing import ModuleID
+from ray.rllib.utils.typing import ModuleID, TensorType
+
+from brainstorming.config import INTRINSIC_REWARD_MODULE_ID, PPO_AGENT_POLICY_ID
 
 
 class IntrinsicAttentionMetaLearner(TorchMetaLearner, PPOTorchLearner):
@@ -16,24 +19,31 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner, PPOTorchLearner):
         """Build the meta-learner with a proper connector pipeline."""
         # Initialize the base learner
         super().build()
-        PPOTorchLearner.build(self)
-        print(f"Meta Learner: {self._learner_connector=}")
 
     @override(TorchMetaLearner)
     def compute_loss_for_module(
         self,
         *,
         module_id: ModuleID,
+        config: AlgorithmConfig,
         batch: Dict[str, Any],
-        fwd_out: Dict[str, Any],
-        others_loss_per_module: Optional[List[Dict[ModuleID, torch.Tensor]]] = None,
-    ) -> torch.Tensor:
+        fwd_out: Dict[str, TensorType],
+        others_loss_per_module: List[Dict[ModuleID, TensorType]] = None,
+    ) -> TensorType:
         """
         Compute meta-loss for optimizing the intrinsic reward network.
 
         The meta-objective is to minimize the PPO policy's loss, which indicates
         that the intrinsic rewards are helping the agent learn better.
         """
+        if module_id == PPO_AGENT_POLICY_ID:
+            return PPOTorchLearner.compute_loss_for_module(
+                self, module_id=module_id, config=config, batch=batch, fwd_out=fwd_out
+            )
+        elif module_id == INTRINSIC_REWARD_MODULE_ID:
+            return 0  # TODO: do we need a loss here actually? And if yes, which one? (PPO LOss does not make sense for intrinsic reward network)
+        else:
+            raise NotImplementedError("Do not know the used module_id: ", module_id)
 
         # TODO: LUAN+PHILIPP: !!! HERE CALCULATE LOSS ONLY WITH EXTRINSIC REWARDS => This happens automatically, becuse the rewards are reset to original during the differential Learner update function
         # But this is the wrong loss, we need to calculate it from fwd_out

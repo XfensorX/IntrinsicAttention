@@ -35,6 +35,8 @@ dependencies = [
   "ray[tune]",
   "hypersweeper",
   "setuptools<81",
+  "torchviz>=0.0.3",
+  "graphviz>=0.21",
 ]
 
 [project.optional-dependencies]

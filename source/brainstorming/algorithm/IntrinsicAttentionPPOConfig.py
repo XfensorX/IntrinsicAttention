@@ -1,10 +1,5 @@
-from typing import List, Type, Union
-
 from ray.rllib.algorithms.algorithm_config import DifferentiableAlgorithmConfig
 from ray.rllib.algorithms.ppo import PPOConfig
-from ray.rllib.core.learner.differentiable_learner import (
-    DifferentiableLearner,
-)
 from ray.rllib.core.learner.differentiable_learner_config import (
     DifferentiableLearnerConfig,
 )
@@ -74,7 +69,7 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
             differentiable_learner_configs=[diff_learner_config],
         )
         self.training(
-            minibatch_size=9,  # meta learner mini train betch size
+            minibatch_size=300,  # meta learner mini train betch size
             train_batch_size_per_learner=2000,
             # sgd_minibatch_size=128,
             # num_sgd_iter=10,
@@ -85,6 +80,9 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
             clip_param=0.2,
             vf_clip_param=10.0,
             entropy_coeff=0.01,
+            use_critic=True,
+            vf_share_layers=True,
+            use_kl_loss=True,
         )
         # # TODO: Set Hyperparameters
         # self.learners(
@@ -119,6 +117,11 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
             learner_only=True,
         )
 
+        # This is a bug in rllib, if you do not set self.grad_clip, but log_gradients is True (default)
+        # Then no gradients will be sent through to the model updates in Learner:
+        # ray/rllib/core/learner/learner.py:559
+        self.log_gradients = False
+
         # self.multi_agent(policies=[PPO_AGENT_POLICY_ID, INTRINSIC_REWARD_MODULE_ID])
         # self.policies = {
         #     PPO_AGENT_POLICY_ID: PolicySpec(),
@@ -126,6 +129,8 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
         # }
         self.rl_module(
             rl_module_spec=MultiRLModuleSpec(
+                # this HAS to stay in this order, ass otherwise gradient computation of the meta learner is wrong (bug in rllib)
+                # ray.rllib.core.learner.torch.torch_differentiable_learner.TorchDifferentiableLearner.compute_gradients
                 rl_module_specs={
                     PPO_AGENT_POLICY_ID: module_spec,
                     INTRINSIC_REWARD_MODULE_ID: intrinsic_reward_module_spec,
@@ -147,8 +152,8 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
     def get_default_learner_class(self) -> type[Learner] | str:
         return IntrinsicAttentionMetaLearner
 
-    @override(DifferentiableAlgorithmConfig)
-    def get_differentiable_learner_classes(
-        self,
-    ) -> List[Union[Type[DifferentiableLearner], str]]:
-        return [IntrinsicPPOLearner]
+    # @override(DifferentiableAlgorithmConfig)
+    # def get_differentiable_learner_classes(
+    #     self,
+    # ) -> List[Union[Type[DifferentiableLearner], str]]:
+    #     return [IntrinsicPPOLearner]

@@ -8,8 +8,6 @@ from ray.rllib.execution.rollout_ops import (
     synchronous_parallel_sample,
 )
 from ray.rllib.policy.sample_batch import MultiAgentBatch, SampleBatch
-
-# Fix the import here
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.metrics import (
     ALL_MODULES,
@@ -26,8 +24,6 @@ from source.brainstorming.config import INTRINSIC_REWARD_MODULE_ID, PPO_AGENT_PO
 
 META_LEARNER_RESULTS = "meta_learner_results"
 META_LEARNER_UPDATE_TIMER = "meta_learner_update_timer"
-
-# from ray.rllib.core.rl_module.multi_rl_module import MultiRLModuleSpec, MultiRLModule
 
 
 class IntrinsicAttentionPPO(PPO):
@@ -119,9 +115,6 @@ class IntrinsicAttentionPPO(PPO):
         intrinsic_coeff = self.config.learner_config_dict["intrinsic_reward_coeff"]
 
         # Adapt the original rewards
-        print(
-            f"{intrinsic_coeff=} {intrinsic_rewards.shape=} { batch[PPO_AGENT_POLICY_ID][Columns.REWARDS].shape=}"
-        )
         batch[PPO_AGENT_POLICY_ID][Columns.REWARDS] = (
             intrinsic_coeff * intrinsic_rewards
             + batch[PPO_AGENT_POLICY_ID][Columns.REWARDS]
@@ -136,15 +129,14 @@ class IntrinsicAttentionPPO(PPO):
                     policy_batches={
                         INTRINSIC_REWARD_MODULE_ID: SampleBatch(
                             **met_step_batch[PPO_AGENT_POLICY_ID],
-                            _max_seq_len=12,  # TODO: load from config
+                            _max_seq_len=251,  # TODO: load from config
                             _zero_padded=True,
                         ),
-                        # TODO: think about if this should be in here
-                        # PPO_AGENT_POLICY_ID: SampleBatch(
-                        #     **inner_step_batch,
-                        #     _max_seq_len=12,  # TODO: load from config
-                        #     _zero_padded=True,
-                        # ),
+                        PPO_AGENT_POLICY_ID: SampleBatch(
+                            **met_step_batch[PPO_AGENT_POLICY_ID],
+                            _max_seq_len=251,  # TODO: load from config
+                            _zero_padded=True,
+                        ),
                     },
                     env_steps=torch.prod(
                         torch.tensor(
@@ -168,13 +160,13 @@ class IntrinsicAttentionPPO(PPO):
                             policy_batches={
                                 PPO_AGENT_POLICY_ID: SampleBatch(
                                     **inner_step_batch[PPO_AGENT_POLICY_ID],
-                                    _max_seq_len=12,  # TODO: load from config
+                                    _max_seq_len=251,  # TODO: load from config
                                     _zero_padded=True,
                                 ),
                                 # TODO: think about if this is correct: (validate that the intrinsic rewards are not used for loss calculation)
                                 INTRINSIC_REWARD_MODULE_ID: SampleBatch(
                                     **met_step_batch[PPO_AGENT_POLICY_ID],
-                                    _max_seq_len=12,  # TODO: load from config
+                                    _max_seq_len=251,  # TODO: load from config
                                     _zero_padded=True,
                                 ),
                             },
@@ -189,5 +181,5 @@ class IntrinsicAttentionPPO(PPO):
                     )
                 ],  # this is the training data for the PPOModule inside the MetaLearner
             )
-            self.metrics.aggregate(learner_results, key=LEARNER_RESULTS)
+        self.metrics.aggregate(learner_results, key=LEARNER_RESULTS)
         return learner_results
