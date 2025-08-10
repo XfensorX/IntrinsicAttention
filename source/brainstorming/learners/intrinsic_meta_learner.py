@@ -11,7 +11,7 @@ from ray.rllib.utils.typing import ModuleID, NamedParamDict, ParamDict, TensorTy
 
 from source.brainstorming.config import INTRINSIC_REWARD_MODULE_ID, PPO_AGENT_POLICY_ID
 from source.brainstorming.learners.CustomPPOLearner import CustomPPOLearner
-from source.brainstorming.learners.IntrinsicRewardLearnerConnector import (
+from source.brainstorming.learners.remove_gae_from_learner_connector import (
     remove_gae_from_learner_connectors,
 )
 
@@ -27,7 +27,6 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner, CustomPPOLearner):
         # Initialize the base learner
         super().build()
         remove_gae_from_learner_connectors(self)
-        print(f"Meta Learner: {self._learner_connector=}")
         self._custom_with_one_ts_to_episode = bool(
             "AddOneTsToEpisodesAndTruncate"
             in [str(x) for x in self._learner_connector.connectors]
@@ -100,9 +99,6 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner, CustomPPOLearner):
         params: Dict[ModuleID, NamedParamDict],
         **kwargs,
     ) -> ParamDict:
-        # for optim in self._optimizer_parameters:
-        #     optim.zero_grad(set_to_none=True)
-
         if self._grad_scalers is not None:
             total_loss = sum(
                 self._grad_scalers[mid].scale(loss)
@@ -145,17 +141,8 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner, CustomPPOLearner):
 
         self._compute_off_policyness(batch)
 
-        # for policy in self.module.keys():
-        #     for p in self.module[policy].parameters():
-        #         p.detach_()  # break ties to previous graph
-        #         p.requires_grad_(True)  # make them leafs again
-        #         p.grad = None  # be tidy
-        inner_loop_policies = self.get_inner_loop_policies()
-        outer_loop_policies = set(self.module.keys()) - inner_loop_policies
+        outer_loop_policies = set(self.module.keys()) - self.get_inner_loop_policies()
 
-        inner_loop_params = {
-            mid: p for mid, p in params.items() if mid in inner_loop_policies
-        }
         outer_loop_params = {
             mid: p for mid, p in params.items() if mid in outer_loop_policies
         }
@@ -164,12 +151,6 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner, CustomPPOLearner):
         loss_per_module = self.compute_losses(
             fwd_out=fwd_out, batch=batch, others_loss_per_module=others_loss_per_module
         )
-
-        for policy in self.module.keys():
-            for p in self.module[policy].parameters():
-                p.detach_()  # break ties to previous graph
-                p.requires_grad_(True)  # make them leafs again
-                p.grad = None  # be tidy
 
         gradients = self.compute_gradients(loss_per_module, outer_loop_params)
 
@@ -181,34 +162,15 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner, CustomPPOLearner):
                         stack.enter_context(mod.no_sync())
             postprocessed_gradients = self.postprocess_gradients(gradients)
 
-            for policy in outer_loop_policies:
-                for name, p in self.module[policy].named_parameters():
-                    if name in postprocessed_gradients:
-                        p.grad = postprocessed_gradients[name]
+            # for policy in outer_loop_policies:
+            #     for name, p in self.module[policy].named_parameters():
+            #         if name in postprocessed_gradients:
+            #             p.grad = postprocessed_gradients[name]
 
-            self.apply_gradients({})
-
-        # for optim in self._optimizer_parameters:
-        #     # `set_to_none=True` is a faster way to zero out the gradients.
-        #     optim.zero_grad(set_to_none=True)
+            self.apply_gradients(postprocessed_gradients)
 
         self.update_gradients_from_inner_loop(params)
 
-        # outer_loop_policies = set(self.module.keys()) - self.get_inner_loop_policies()
-        #
-        # for policy in outer_loop_policies:
-        #     for p in self.module[policy].parameters():
-        #         p.detach_()  # break ties to previous graph
-        #         p.requires_grad_(True)  # make them leafs again
-        #         p.grad = None  # be tidy
-
-        for policy in self.module.keys():
-            for p in self.module[policy].parameters():
-                p.detach_()  # break ties to previous graph
-                p.requires_grad_(True)  # make them leafs again
-                p.grad = None  # be tidy
-
-        self._params = {}
         return fwd_out, loss_per_module, {}
 
     def update_gradients_from_inner_loop(

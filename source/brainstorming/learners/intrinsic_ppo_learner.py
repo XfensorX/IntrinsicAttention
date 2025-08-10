@@ -10,7 +10,7 @@ from ray.rllib.utils.typing import ModuleID, NamedParamDict, TensorType
 
 from source.brainstorming.config import INTRINSIC_REWARD_MODULE_ID, PPO_AGENT_POLICY_ID
 from source.brainstorming.learners.CustomPPOLearner import CustomPPOLearner
-from source.brainstorming.learners.IntrinsicRewardLearnerConnector import (
+from source.brainstorming.learners.remove_gae_from_learner_connector import (
     remove_gae_from_learner_connectors,
 )
 
@@ -32,55 +32,11 @@ class IntrinsicPPOLearner(
             self
         )  # as rllib forgot to call super.build() in Differential learner
         remove_gae_from_learner_connectors(self)
-        print(f"PPO Learner {self._learner_connector=}")
         self._custom_with_one_ts_to_episode = bool(
             "AddOneTsToEpisodesAndTruncate"
             in [str(x) for x in self._learner_connector.connectors]
         )
 
-    # @override(TorchDifferentiableLearner)
-    # def update(
-    #     self,
-    #     params: Dict[ModuleID, NamedParamDict],
-    #     training_data: TrainingData
-    # ) -> Dict[str, Any]:
-    #     """
-    #     Main update method that handles intrinsic rewards before PPO update.
-
-    #     Args:
-    #         batch: The training batch to learn from.
-
-    #     Returns:
-    #         Dictionary with update metrics.
-    #     """
-    #     # Track the original rewards for later use
-    #     self._original_rewards = batch[DEFAULT_POLICY_ID][Columns.REWARDS].clone()
-
-    #     # Process the batch to compute intrinsic rewards (if intrinsic module exists)
-    #     # Get intrinsic rewards for the batch
-    #     intrinsic_output = self.module[
-    #         INTRINSIC_REWARD_MODULE_ID
-    #     ].forward_train(  # TODO: LUNA+PHILIPP : HAS TO BE NON-UPDATE CALL
-    #         batch
-    #     )
-    #     intrinsic_rewards = intrinsic_output[Columns.INTRINSIC_REWARDS]
-
-    #     # Add intrinsic rewards to the extrinsic rewards
-    #     intrinsic_coeff = self.config.learner_config_dict["intrinsic_reward_coeff"]
-    #     batch[DEFAULT_POLICY_ID][Columns.REWARDS] += intrinsic_coeff * intrinsic_rewards
-
-    #     # Run standard PPO update with the augmented rewards
-    #     results = super().update(
-    #         params=batch
-    #     )  # TODO: Is this correct there? does this actually just update the policy??
-
-    #     # hallucinate update,
-
-    #     # Restore original rewards
-    #     batch[DEFAULT_POLICY_ID][Columns.REWARDS] = self._original_rewards
-    #     # TODO: We guess there is the pseudo update missing here
-
-    #     return results
     @override(TorchDifferentiableLearner)
     def compute_gradients(
         self,

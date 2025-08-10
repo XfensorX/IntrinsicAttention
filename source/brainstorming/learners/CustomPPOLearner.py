@@ -1,12 +1,17 @@
 from typing import Any, Dict
 
 from ray.rllib.algorithms.ppo.ppo import (
+    LEARNER_RESULTS_KL_KEY,
+    LEARNER_RESULTS_VF_EXPLAINED_VAR_KEY,
+    LEARNER_RESULTS_VF_LOSS_UNCLIPPED_KEY,
     PPOConfig,
 )
 from ray.rllib.algorithms.ppo.torch.ppo_torch_learner import PPOTorchLearner
 from ray.rllib.core.columns import Columns
+from ray.rllib.core.learner.learner import ENTROPY_KEY, POLICY_LOSS_KEY, VF_LOSS_KEY
 from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
+from ray.rllib.utils.torch_utils import explained_variance
 from ray.rllib.utils.typing import ModuleID, TensorType
 
 from source.brainstorming.config import (
@@ -18,19 +23,6 @@ from source.brainstorming.config import (
 from source.brainstorming.learners.pytorch_differentiable_funcs import compute_gae
 
 torch, nn = try_import_torch()
-
-
-# def are_equal_batches(batch1: Dict[str, torch.Tensor], batch2: Dict[str, torch.Tensor]):
-#     assert batch1.accessed_keys == batch2.accessed_keys
-#     for key in batch1.accessed_keys - set(["state_in"]):
-#         assert batch1[key].shape == batch2[key].shape
-#         assert (batch1[key] == batch2[key]).all()
-#
-#     if "state_in" in batch1.accessed_keys:
-#         for key in batch1["state_in"].keys():
-#             assert batch1["state_in"][key].shape == batch2["state_in"][key].shape
-#             assert (batch1["state_in"][key] == batch2["state_in"][key]).all()
-#     return True
 
 
 class CustomPPOLearner(PPOTorchLearner):
@@ -130,7 +122,9 @@ class CustomPPOLearner(PPOTorchLearner):
             mean_vf_unclipped_loss = possibly_masked_mean(vf_loss)
         else:
             z = torch.tensor(0.0, device=surrogate_loss.device)
-            value_fn_out = mean_vf_unclipped_loss = vf_loss_clipped = mean_vf_loss = z
+            value_predictions_ = mean_vf_unclipped_loss = vf_loss_clipped = (
+                mean_vf_loss
+            ) = z
 
         total_loss = possibly_masked_mean(
             -surrogate_loss
@@ -148,21 +142,21 @@ class CustomPPOLearner(PPOTorchLearner):
                 self.curr_kl_coeffs_per_module[PPO_AGENT_POLICY_ID] * mean_kl_loss
             )
 
-        # TODO: do correct metrics after the loss is correct
-        # self.metrics.log_dict(
-        #     {
-        #         POLICY_LOSS_KEY: -possibly_masked_mean(surrogate_loss),
-        #         VF_LOSS_KEY: mean_vf_loss,
-        #         LEARNER_RESULTS_VF_LOSS_UNCLIPPED_KEY: mean_vf_unclipped_loss,
-        #         LEARNER_RESULTS_VF_EXPLAINED_VAR_KEY: explained_variance(
-        #             batch[Postprocessing.VALUE_TARGETS], value_fn_out
-        #         ),
-        #         ENTROPY_KEY: mean_entropy,
-        #         LEARNER_RESULTS_KL_KEY: mean_kl_loss,
-        #     },
-        #     key=PPO_AGENT_POLICY_ID,
-        #     window=1,  # <- single items (should not be mean/ema-reduced over time).
-        # )
+        self.metrics.log_dict(
+            {
+                POLICY_LOSS_KEY: -possibly_masked_mean(surrogate_loss),
+                VF_LOSS_KEY: mean_vf_loss,
+                LEARNER_RESULTS_VF_LOSS_UNCLIPPED_KEY: mean_vf_unclipped_loss,
+                LEARNER_RESULTS_VF_EXPLAINED_VAR_KEY: explained_variance(
+                    value_targets, value_predictions_
+                ),
+                ENTROPY_KEY: mean_entropy,
+                LEARNER_RESULTS_KL_KEY: mean_kl_loss,
+                "use_intrinsic_rewards": use_intrinsic_rewards,
+            },
+            key=PPO_AGENT_POLICY_ID,
+            window=1,  # <- single items (should not be mean/ema-reduced over time).
+        )
         return total_loss
 
     @override(PPOTorchLearner)
