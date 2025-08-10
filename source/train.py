@@ -3,10 +3,11 @@ import os
 import ray
 from ray import tune
 
-from source.brainstorming.algorithm.IntrinsicAttentionPPOConfig import (
+from source.environments.t_maze_pas import create_env_tmaze
+from source.environments.umbrella_chain import UmbrellaChainEnv
+from source.intrinsic_attention_ppo.algorithm.IntrinsicAttentionPPOConfig import (
     IntrinsicAttentionPPOConfig,
 )
-from source.brainstorming.environments.t_maze_pas import create_env_tmaze
 
 
 def main():
@@ -24,7 +25,7 @@ def main():
         config=config.to_dict(),
         name="FirstTry",
         stop={"num_env_steps_sampled_lifetime": 200000},
-        storage_path=os.path.join(os.path.dirname(__file__), "results"),
+        storage_path=os.path.abspath("results"),
         verbose=1,
     )
 

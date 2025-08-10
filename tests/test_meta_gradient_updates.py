@@ -1,8 +1,8 @@
-# from brainstorming.algorithm.IntrinsicAttentionPPO import IntrinsicAttentionPPO
-# from source.brainstorming.algorithm.IntrinsicAttentionPPOConfig import (
+# from intrinsic_attention_ppo.algorithm.IntrinsicAttentionPPO import IntrinsicAttentionPPO
+# from source.intrinsic_attention_ppo.algorithm.IntrinsicAttentionPPOConfig import (
 #     IntrinsicAttentionPPOConfig,
 # )
-# from source.brainstorming.environments.umbrella_chain import create_env
+# from source.intrinsic_attention_ppo.environments.umbrella_chain import create_env
 
 
 def test_correct_gradient_updates():

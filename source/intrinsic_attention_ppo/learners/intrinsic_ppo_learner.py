@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+from ray.rllib.algorithms.algorithm_config import AlgorithmConfig
 from ray.rllib.algorithms.ppo.torch.ppo_torch_learner import PPOTorchLearner
 from ray.rllib.core.learner.torch.torch_differentiable_learner import (
     TorchDifferentiableLearner,
@@ -8,9 +9,12 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import ModuleID, NamedParamDict, TensorType
 
-from source.brainstorming.config import INTRINSIC_REWARD_MODULE_ID, PPO_AGENT_POLICY_ID
-from source.brainstorming.learners.CustomPPOLearner import CustomPPOLearner
-from source.brainstorming.learners.remove_gae_from_learner_connector import (
+from source.intrinsic_attention_ppo.config import (
+    INTRINSIC_REWARD_MODULE_ID,
+    PPO_AGENT_POLICY_ID,
+)
+from source.intrinsic_attention_ppo.learners.CustomPPOLearner import CustomPPOLearner
+from source.intrinsic_attention_ppo.learners.remove_gae_from_learner_connector import (
     remove_gae_from_learner_connectors,
 )
 
@@ -93,7 +97,7 @@ class IntrinsicPPOLearner(
         self,
         *,
         module_id: ModuleID,
-        config: "AlgorithmConfig",
+        config: AlgorithmConfig,
         batch: Dict[str, Any],
         fwd_out: Dict[str, TensorType],
     ) -> TensorType:
