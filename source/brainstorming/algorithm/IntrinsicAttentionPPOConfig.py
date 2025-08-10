@@ -58,7 +58,7 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
             batch_mode="complete_episodes",
             rollout_fragment_length="auto",
             num_envs_per_env_runner=1,
-            num_env_runners=1,
+            num_env_runners=0,
         )
         diff_learner_config = DifferentiableLearnerConfig(
             learner_class=IntrinsicPPOLearner,
@@ -71,7 +71,7 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
         )
 
         self.learners(
-            differentiable_learner_configs=[diff_learner_config],
+            differentiable_learner_configs=[diff_learner_config], num_learners=0
         )
 
         # for Params Ranges, e.g. have a look at
