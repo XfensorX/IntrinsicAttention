@@ -77,7 +77,6 @@ class IntrinsicAttentionPPO(PPO):
 
     def custom_sample_batch(self):
         episodes = self.custom_sample_episodes()
-        print(f"DEBUG 2: {self.learner_group._learner._learner_connector.connectors=}")
         batch = self.learner_group._learner._learner_connector(
             rl_module=self.learner_group._learner.module,
             episodes=episodes,

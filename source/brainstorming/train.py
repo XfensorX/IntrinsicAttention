@@ -3,6 +3,7 @@ import os
 import ray
 from ray import tune
 
+from source.brainstorming.algorithm.IntrinsicAttentionPPO import IntrinsicAttentionPPO
 from source.brainstorming.algorithm.IntrinsicAttentionPPOConfig import (
     IntrinsicAttentionPPOConfig,
 )
@@ -20,7 +21,7 @@ def main():
     #     num_cpus_per_env_runner=1,
     # )
     results = tune.run(
-        lambda _: config.build_algo(),
+        IntrinsicAttentionPPO,
         config=config.to_dict(),
         name="FirstTry",
         stop={"num_env_steps_sampled_lifetime": 200000},
