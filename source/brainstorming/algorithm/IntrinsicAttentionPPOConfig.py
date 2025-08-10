@@ -13,7 +13,6 @@ from ray.rllib.utils.annotations import override
 
 from source.brainstorming.algorithm.IntrinsicAttentionPPO import IntrinsicAttentionPPO
 from source.brainstorming.config import INTRINSIC_REWARD_MODULE_ID, PPO_AGENT_POLICY_ID
-from source.brainstorming.environments.umbrella_chain import create_env
 from source.brainstorming.learners.intrinsic_meta_learner import (
     IntrinsicAttentionMetaLearner,
 )
@@ -31,7 +30,7 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
 
     # TODO: Noch etwas lost hier alles
 
-    def __init__(self, algo_class=None):
+    def __init__(self, algo_class=None, environment=None):
         PPOConfig.__init__(
             self, algo_class=algo_class or IntrinsicAttentionPPO
         )  # FIXME: was intrinsicattention PPO
@@ -41,6 +40,9 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
             algo_class=algo_class
             or IntrinsicAttentionPPO,  # FIXME: does this have to change?
         )
+
+        if environment is not None:
+            self.environment(environment)
 
         # Make sure we're using the new API stack
         self.api_stack(
@@ -107,13 +109,13 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
                 "vf_share_layers": True,
                 "max_seq_len": 7,
             },
-            action_space=create_env(None).action_space,
-            observation_space=create_env(None).observation_space,
+            action_space=self.action_space,
+            observation_space=self.observation_space,
         )
         intrinsic_reward_module_spec = RLModuleSpec(
             module_class=IntrinsicAttentionModule,
-            observation_space=create_env(None).observation_space,
-            action_space=create_env(None).action_space,
+            observation_space=self.observation_space,
+            action_space=self.action_space,
             learner_only=True,
             model_config={
                 "vf_share_layers": True,

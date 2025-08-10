@@ -1,8 +1,7 @@
-import numpy as np
-# import gym
-import matplotlib.pyplot as plt
-import os
 from typing import Any, Dict, Mapping, Optional
+
+import gymnasium as gym
+import numpy as np
 
 """
 T-Maze: originated from (Bakker, 2001) and earlier neuroscience work, 
@@ -27,12 +26,12 @@ g2 is goal candidate, (x, y) = (o + corridor_length, -1)
 RL Project Note: We used the exisiting Code for the Env from the (https://github.com/twni2016/Memory-RL/tree/main) repo and added a few changes
 """
 
+
 # TODO. Sicherstellen das Agent immer nur nach rechts gehen kann!!! Damit er sich in jeder Episode bei J entscheiden muss
 # und so immer entweder 1 oder 0 kriegt. Ein random Agent der zufällig entscheidet würde dann immer auf 0.5 kommen -> Baseline
 
 
 def create_env_tmaze(env_config: Optional[Mapping[str, Any]] = None):
-
     defaults: Dict[str, Any] = {
         "episode_length": 200,  # int
         "corridor_length": 199,  # int

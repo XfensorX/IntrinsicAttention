@@ -14,10 +14,6 @@ import numpy as np
 from gymnasium import spaces
 
 
-def create_env(config):
-    return UmbrellaChainEnv(5)  # TODO: configure in the config
-
-
 class UmbrellaChainEnv(gym.Env):
     """
     A simple diagnostic credit-assignment challenge.
