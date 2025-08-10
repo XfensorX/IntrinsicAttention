@@ -214,3 +214,4 @@ __marimo__/
 .vscode/settings.json
 # Ignore all results directories
 **/results/
+results

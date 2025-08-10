@@ -5,48 +5,52 @@
 name = "IntrinsicAttention"
 version = "2025"
 description = "Analysis of intrinsic reward generated on full trajectories with attention based model in Reinforcement Learning"
-authors = [{ name = "Philipp W. Link", email = "p.link@stud.uni-hannover.de" }, {name = "Julius Heidmann", email = "julius.heidmann@stud.uni-hannover.de"}, {name = "K. Luan A. Liebig-Schultz", email = "luan.liebig-schultz@stud.uni-hannover.de"}]
+authors = [{ name = "Philipp W. Link", email = "p.link@stud.uni-hannover.de" }, { name = "Julius Heidmann", email = "julius.heidmann@stud.uni-hannover.de" }, { name = "K. Luan A. Liebig-Schultz", email = "luan.liebig-schultz@stud.uni-hannover.de" }]
 readme = "README.md"
 requires-python = "~=3.11"
 keywords = [
-  "Reinforcement Learning",
-  "Attention"
+    "Reinforcement Learning",
+    "Attention"
 ]
 
+
 dependencies = [
-  "numpy<2.0",
-  "gymnasium",
-  "torch",
-  "tqdm",
-  "matplotlib",
-  "minigrid",
-  "seaborn",
-  "pandas",
-  "rich",
-  "jupyterlab",
-  "tensorboard",
-  "hydra-core",
-  "hydra-submitit-launcher",
-  "hydra-ray-launcher",
-  "hydra-colorlog",
-  "moviepy",
-  "rliable",
-  "ray[rllib]",
-  "ray[tune]",
-  "hypersweeper",
-  "setuptools<81",
-  "torchviz>=0.0.3",
-  "graphviz>=0.21",
+    "numpy<2.0",
+    "gymnasium",
+    "torch",
+    "tqdm",
+    "matplotlib",
+    "minigrid",
+    "seaborn",
+    "pandas",
+    "rich",
+    "jupyterlab",
+    "tensorboard",
+    "hydra-core",
+    "hydra-submitit-launcher",
+    "hydra-ray-launcher",
+    "hydra-colorlog",
+    "moviepy",
+    "rliable",
+    "ray[rllib]",
+    "ray[tune]",
+    "hypersweeper",
+    "setuptools<81",
+    "torchviz>=0.0.3",
+    "graphviz>=0.21",
+    "pytest>=8.4.1",
+    "sentry-sdk<2.0",
+    "hypothesis>=6.137.1",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=4.6",
-        "pytest-cov",
-        "pytest-xdist",
-        "pytest-timeout",
-        "ruff",
-        "pre-commit",
-        "isort"]
+    "pytest-cov",
+    "pytest-xdist",
+    "pytest-timeout",
+    "ruff",
+    "pre-commit",
+    "isort"]
 
 [tool.isort]
 py_version = "38"
@@ -68,7 +72,7 @@ multi_line_output = 3 # https://pycqa.github.io/isort/docs/configuration/multi_l
 
 [tool.pydocstyle]
 convention = "numpy"
-add-ignore = [ # http://www.pydocstyle.org/en/stable/error_codes.html
+add-ignore = [# http://www.pydocstyle.org/en/stable/error_codes.html
     "D100", # Missing docstring in public module
     "D101", # Missing docstring in public class
     "D104", # Missing docstring in public package
@@ -90,6 +94,6 @@ extend-exclude = []
 
 [tool.ruff.lint]
 ignore = [
-  # Conflicts with the formatter
-  "COM812", "ISC001"
+    # Conflicts with the formatter
+    "COM812", "ISC001"
 ]
