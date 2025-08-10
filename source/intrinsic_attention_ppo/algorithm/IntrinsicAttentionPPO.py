@@ -47,6 +47,7 @@ class IntrinsicAttentionPPO(PPO):
         Returns:
             Dict with training metrics
         """
+        self.metrics.activate_tensor_mode()
         batch = self.custom_sample_batch()
         learner_results = self.custom_meta_gradient_update(batch)
         self.custom_sync_weights(learner_results)

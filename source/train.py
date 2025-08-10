@@ -27,9 +27,9 @@ def main():
         IntrinsicAttentionPPO,
         config=config.to_dict(),
         name="FirstTry",
-        stop={"num_env_steps_sampled_lifetime": 200000},
+        stop={"num_env_steps_sampled_lifetime": 10000},
         storage_path=os.path.abspath("results"),
-        verbose=1,
+        verbose=2,
     )
 
     import pprint

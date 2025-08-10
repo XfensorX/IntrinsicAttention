@@ -174,8 +174,11 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner, CustomPPOLearner):
             self.apply_gradients(postprocessed_gradients)
 
         self.update_gradients_from_inner_loop(params)
-
-        return fwd_out, loss_per_module, {}
+        return (
+            fwd_out,
+            {key: value.item() for key, value in loss_per_module.items()},
+            {},
+        )
 
     def update_gradients_from_inner_loop(
         self, inner_loop_parameters: Dict[ModuleID, NamedParamDict]

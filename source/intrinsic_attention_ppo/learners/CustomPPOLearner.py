@@ -145,14 +145,14 @@ class CustomPPOLearner(PPOTorchLearner):
 
         self.metrics.log_dict(
             {
-                POLICY_LOSS_KEY: -possibly_masked_mean(surrogate_loss),
-                VF_LOSS_KEY: mean_vf_loss,
-                LEARNER_RESULTS_VF_LOSS_UNCLIPPED_KEY: mean_vf_unclipped_loss,
+                POLICY_LOSS_KEY: -possibly_masked_mean(surrogate_loss).item(),
+                VF_LOSS_KEY: mean_vf_loss.item(),
+                LEARNER_RESULTS_VF_LOSS_UNCLIPPED_KEY: mean_vf_unclipped_loss.item(),
                 LEARNER_RESULTS_VF_EXPLAINED_VAR_KEY: explained_variance(
                     value_targets, value_predictions_
-                ),
-                ENTROPY_KEY: mean_entropy,
-                LEARNER_RESULTS_KL_KEY: mean_kl_loss,
+                ).item(),
+                ENTROPY_KEY: mean_entropy.item(),
+                LEARNER_RESULTS_KL_KEY: mean_kl_loss.item(),
                 "use_intrinsic_rewards": use_intrinsic_rewards,
             },
             key=PPO_AGENT_POLICY_ID,

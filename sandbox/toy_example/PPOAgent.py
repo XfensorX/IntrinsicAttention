@@ -3,7 +3,7 @@ from ray.rllib.algorithms.ppo import PPOConfig
 from ray.rllib.core.rl_module import RLModuleSpec
 from ray.rllib.core.rl_module.default_model_config import DefaultModelConfig
 
-from source.toy_example.toy_PPOLearner import ToyPPOLearner
+from sandbox.toy_example.toy_PPOLearner import ToyPPOLearner
 
 
 def get_ppo_config(cfg: DictConfig) -> PPOConfig:
