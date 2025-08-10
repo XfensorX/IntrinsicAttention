@@ -72,6 +72,7 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
             lr=0.01,
             add_default_connectors_to_learner_pipeline=True,
             policies_to_update=[PPO_AGENT_POLICY_ID],
+            minibatch_size=500,
             # num_total_minibatches=1,
             # num_epochs=1,
         )
@@ -83,8 +84,8 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
         # for Params Ranges, e.g. have a look at
         # https://medium.com/aureliantactics/ppo-hyperparameters-and-ranges-6fc2d29bccbe
         self.training(
-            minibatch_size=10,  # meta learner mini train betch size
-            train_batch_size_per_learner=25,
+            minibatch_size=500,  # meta learner mini train betch size
+            train_batch_size_per_learner=2000,
             # sgd_minibatch_size=128,
             # num_sgd_iter=10,
             num_epochs=10,
@@ -101,6 +102,7 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
             kl_coeff=0.5,
             use_gae=True,
             vf_loss_coeff=0.75,
+            learner_class=IntrinsicAttentionMetaLearner,
         )
 
         module_spec = RLModuleSpec(
@@ -113,7 +115,7 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
                 "attention_v_dim": 15,
                 "attention_qk_dim": 17,
                 "vf_share_layers": True,
-                "max_seq_len": 7,
+                "max_seq_len": 500,
             },
             action_space=self.action_space,
             observation_space=self.observation_space,
