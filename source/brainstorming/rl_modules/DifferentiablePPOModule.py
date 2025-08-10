@@ -10,6 +10,7 @@ from ray.rllib.utils.typing import TensorType
 
 from source.brainstorming.base_models.GRUBase import GRUBase
 from source.brainstorming.base_models.ReluMlp import ReluMlp
+from source.brainstorming.config import COL_EX_IN_VF_PREDS, COL_EX_VF_PREDS
 
 torch, nn = try_import_torch()
 
@@ -44,6 +45,10 @@ class DifferentiablePPOModule(TorchRLModule, ValueFunctionAPI):
         )
 
         self.value_head = ReluMlp(
+            [pre_head_embedding_dim, pre_head_embedding_dim, 1], output_layer=None
+        )
+
+        self.extrinsic_value_head = ReluMlp(
             [pre_head_embedding_dim, pre_head_embedding_dim, 1], output_layer=None
         )
 
@@ -96,18 +101,16 @@ class DifferentiablePPOModule(TorchRLModule, ValueFunctionAPI):
         return {
             Columns.ACTION_DIST_INPUTS: action_logits,
             Columns.STATE_OUT: {"h": state_out},
-            Columns.EMBEDDINGS: gru_embeddings,
+            # Columns.EMBEDDINGS: gru_embeddings,  # TODO: remove this, as we should not use it outside
+            COL_EX_IN_VF_PREDS: self.value_head(gru_embeddings).squeeze(-1),
+            COL_EX_VF_PREDS: self.extrinsic_value_head(gru_embeddings).squeeze(-1),
         }
 
     @override(ValueFunctionAPI)
     def compute_values(
         self, batch: Dict[str, Any], embeddings: Optional[Any] = None
     ) -> TensorType:
-        # TODO: This error was raised
-        # raise NotImplementedError()
-        if embeddings is None:
-            embeddings = batch.get(Columns.EMBEDDINGS)
-        return self.value_head(embeddings).squeeze(-1)
+        raise ValueError("This cannot be called !")
 
     def _compute_gru_embeddings_and_state_outs(self, h_in, obs_action_embedding):
         # TODO: Is this necessary? Rllib [batch, num_layers, hidden_size], GRU needs [num_layers, batch, hidden_size]

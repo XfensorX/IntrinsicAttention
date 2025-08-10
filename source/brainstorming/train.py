@@ -33,6 +33,8 @@ def main():
     # )
     # Run the Tuner and capture the results.
     # results = tuner.fit()
+    # with torch.autograd.set_detect_anomaly(True):  # TODO: remove
+
     algo = config.build_algo()
 
     pprint(algo.train())

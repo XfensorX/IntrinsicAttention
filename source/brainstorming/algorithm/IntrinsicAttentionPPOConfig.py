@@ -1,4 +1,7 @@
-from ray.rllib.algorithms.algorithm_config import DifferentiableAlgorithmConfig
+from ray.rllib.algorithms.algorithm_config import (
+    AlgorithmConfig,
+    DifferentiableAlgorithmConfig,
+)
 from ray.rllib.algorithms.ppo import PPOConfig
 from ray.rllib.core.learner.differentiable_learner_config import (
     DifferentiableLearnerConfig,
@@ -68,9 +71,12 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
         self.learners(
             differentiable_learner_configs=[diff_learner_config],
         )
+
+        # for Params Ranges, e.g. have a look at
+        # https://medium.com/aureliantactics/ppo-hyperparameters-and-ranges-6fc2d29bccbe
         self.training(
-            minibatch_size=300,  # meta learner mini train betch size
-            train_batch_size_per_learner=2000,
+            minibatch_size=10,  # meta learner mini train betch size
+            train_batch_size_per_learner=25,
             # sgd_minibatch_size=128,
             # num_sgd_iter=10,
             num_epochs=10,
@@ -78,34 +84,28 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
             gamma=0.99,
             lambda_=0.95,
             clip_param=0.2,
-            vf_clip_param=10.0,
+            vf_clip_param=0.5,
             entropy_coeff=0.01,
             use_critic=True,
             vf_share_layers=True,
             use_kl_loss=True,
+            kl_target=0.005,
+            kl_coeff=0.5,
+            use_gae=True,
+            vf_loss_coeff=0.75,
         )
-        # # TODO: Set Hyperparameters
-        # self.learners(
-        #     differentiable_learner_configs=[
-        #         DifferentiableLearnerConfig(
-        #             learner_class=IntrinsicPPOLearner,
-        #             policies_to_update=[DEFAULT_POLICY_ID],
-        #         ),  # TODO: Validate this
-        #     ]
-        # )
-
-        # Configure main PPO model
 
         module_spec = RLModuleSpec(
             module_class=DifferentiablePPOModule,
             model_config={
-                "obs_embed_dim": 64,
-                "pre_head_embedding_dim": 256,
-                "gru_hidden_size": 256,
-                "gru_num_layers": 2,
-                "attention_v_dim": 32,
-                "attention_qk_dim": 32,
-                "max_seq_len": 251,
+                "obs_embed_dim": 2,
+                "pre_head_embedding_dim": 5,
+                "gru_hidden_size": 3,
+                "gru_num_layers": 1,
+                "attention_v_dim": 15,
+                "attention_qk_dim": 17,
+                "vf_share_layers": True,
+                "max_seq_len": 7,
             },
             action_space=create_env(None).action_space,
             observation_space=create_env(None).observation_space,
@@ -115,6 +115,9 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
             observation_space=create_env(None).observation_space,
             action_space=create_env(None).action_space,
             learner_only=True,
+            model_config={
+                "vf_share_layers": True,
+            },
         )
 
         # This is a bug in rllib, if you do not set self.grad_clip, but log_gradients is True (default)
@@ -135,18 +138,23 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
                     PPO_AGENT_POLICY_ID: module_spec,
                     INTRINSIC_REWARD_MODULE_ID: intrinsic_reward_module_spec,
                 }
-            )
+            ),
+            algorithm_config_overrides_per_module={
+                INTRINSIC_REWARD_MODULE_ID: AlgorithmConfig.overrides(lr=0.0005)
+                # own learning rate for intrinsic reward
+            },
         )
 
         # Configure intrinsic reward coefficient and other meta-learning parameters
-        # TODO: somehow enter these values
-        self.learner_config_dict = {
-            # Coefficient for intrinsic rewards
-            "intrinsic_reward_coeff": 0.01,
-            # Regularization weights
-            "sparsity_weight": 0.01,
-            "entropy_weight": 0.001,
-        }
+        self.learner_config_dict.update(
+            {
+                # Coefficient for intrinsic rewards
+                "intrinsic_reward_coeff": 1.0,  # FIXME: change
+                # Regularization weights
+                "sparsity_weight": 0.01,
+                "entropy_weight": 0.001,
+            }
+        )
 
     @override(PPOConfig)
     def get_default_learner_class(self) -> type[Learner] | str:

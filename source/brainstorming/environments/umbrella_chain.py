@@ -15,7 +15,7 @@ from gymnasium import spaces
 
 
 def create_env(config):
-    return UmbrellaChainEnv(200)  # TODO: configure in the config
+    return UmbrellaChainEnv(5)  # TODO: configure in the config
 
 
 class UmbrellaChainEnv(gym.Env):
