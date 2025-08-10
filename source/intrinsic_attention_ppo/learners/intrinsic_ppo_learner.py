@@ -1,6 +1,5 @@
 from typing import Any, Dict
 
-from ray.rllib.algorithms.algorithm_config import AlgorithmConfig
 from ray.rllib.algorithms.ppo.torch.ppo_torch_learner import PPOTorchLearner
 from ray.rllib.core.learner.torch.torch_differentiable_learner import (
     TorchDifferentiableLearner,
@@ -91,14 +90,3 @@ class IntrinsicPPOLearner(
             PPO_AGENT_POLICY_ID: loss,
             INTRINSIC_REWARD_MODULE_ID: torch.tensor(0.0, device=loss.device),
         }
-
-    @override(TorchDifferentiableLearner)
-    def compute_loss_for_module(
-        self,
-        *,
-        module_id: ModuleID,
-        config: AlgorithmConfig,
-        batch: Dict[str, Any],
-        fwd_out: Dict[str, TensorType],
-    ) -> TensorType:
-        raise NotImplementedError()

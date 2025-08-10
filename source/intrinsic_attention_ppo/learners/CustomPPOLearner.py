@@ -9,10 +9,9 @@ from ray.rllib.algorithms.ppo.ppo import (
 from ray.rllib.algorithms.ppo.torch.ppo_torch_learner import PPOTorchLearner
 from ray.rllib.core.columns import Columns
 from ray.rllib.core.learner.learner import ENTROPY_KEY, POLICY_LOSS_KEY, VF_LOSS_KEY
-from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.torch_utils import explained_variance
-from ray.rllib.utils.typing import ModuleID, TensorType
+from ray.rllib.utils.typing import ModuleID
 
 from source.intrinsic_attention_ppo.config import (
     COL_EX_IN_VF_PREDS,
@@ -160,14 +159,3 @@ class CustomPPOLearner(PPOTorchLearner):
             window=1,  # <- single items (should not be mean/ema-reduced over time).
         )
         return total_loss
-
-    @override(PPOTorchLearner)
-    def compute_loss_for_module(
-        self,
-        *,
-        module_id: ModuleID,
-        config: PPOConfig,
-        batch: Dict[str, Any],
-        fwd_out: Dict[str, TensorType],
-    ) -> TensorType:
-        raise NotImplementedError("This should not be used. Use compute_losses instead")

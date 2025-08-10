@@ -55,7 +55,6 @@ class IntrinsicAttentionPPO(PPO):
         with self.metrics.log_time((TIMERS, SYNCH_WORKER_WEIGHTS_TIMER)):
             modules_to_update = set(learner_results[0].keys()) - {ALL_MODULES}
 
-            print(f"DEBUG 1: {modules_to_update=}")
             self.env_runner_group.sync_weights(
                 # Sync weights from learner_group to all EnvRunners.
                 from_worker_or_learner_group=self.learner_group,
@@ -80,7 +79,6 @@ class IntrinsicAttentionPPO(PPO):
 
     def custom_sample_batch(self):
         episodes = self.custom_sample_episodes()
-        print(f"DEBUG 2: {self.learner_group._learner._learner_connector.connectors=}")
         batch = self.learner_group._learner._learner_connector(
             rl_module=self.learner_group._learner.module,
             episodes=episodes,
