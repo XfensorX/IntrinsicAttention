@@ -11,16 +11,23 @@ from ray.rllib.core.rl_module.multi_rl_module import MultiRLModuleSpec
 from ray.rllib.core.rl_module.rl_module import RLModuleSpec
 from ray.rllib.utils.annotations import override
 
-from source.brainstorming.algorithm.IntrinsicAttentionPPO import IntrinsicAttentionPPO
-from source.brainstorming.config import INTRINSIC_REWARD_MODULE_ID, PPO_AGENT_POLICY_ID
-from source.brainstorming.learners.intrinsic_meta_learner import (
+from source.intrinsic_attention_ppo.algorithm.IntrinsicAttentionPPO import (
+    IntrinsicAttentionPPO,
+)
+from source.intrinsic_attention_ppo.config import (
+    INTRINSIC_REWARD_MODULE_ID,
+    PPO_AGENT_POLICY_ID,
+)
+from source.intrinsic_attention_ppo.learners.intrinsic_meta_learner import (
     IntrinsicAttentionMetaLearner,
 )
-from source.brainstorming.learners.intrinsic_ppo_learner import IntrinsicPPOLearner
-from source.brainstorming.rl_modules.DifferentiablePPOModule import (
+from source.intrinsic_attention_ppo.learners.intrinsic_ppo_learner import (
+    IntrinsicPPOLearner,
+)
+from source.intrinsic_attention_ppo.rl_modules.DifferentiablePPOModule import (
     DifferentiablePPOModule,
 )
-from source.brainstorming.rl_modules.IntrinsicAttentionModule import (
+from source.intrinsic_attention_ppo.rl_modules.IntrinsicAttentionModule import (
     IntrinsicAttentionModule,
 )
 

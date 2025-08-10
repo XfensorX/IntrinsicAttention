@@ -18,7 +18,10 @@ from ray.rllib.utils.metrics import (
     TIMERS,
 )
 
-from source.brainstorming.config import INTRINSIC_REWARD_MODULE_ID, PPO_AGENT_POLICY_ID
+from source.intrinsic_attention_ppo.config import (
+    INTRINSIC_REWARD_MODULE_ID,
+    PPO_AGENT_POLICY_ID,
+)
 
 META_LEARNER_RESULTS = "meta_learner_results"
 META_LEARNER_UPDATE_TIMER = "meta_learner_update_timer"

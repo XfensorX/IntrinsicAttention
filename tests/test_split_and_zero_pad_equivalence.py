@@ -8,7 +8,7 @@ from ray.rllib.utils.postprocessing.zero_padding import (
 )
 from ray.rllib.utils.spaces.space_utils import BatchedNdArray
 
-from brainstorming.learners.pytorch_differentiable_funcs import (
+from source.intrinsic_attention_ppo.learners.pytorch_differentiable_funcs import (
     split_and_zero_pad as split_and_zero_pad_torch,
 )
 

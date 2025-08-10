@@ -2,6 +2,7 @@ from typing import Any, Dict, List
 
 import contextlib
 
+from ray.rllib.algorithms.algorithm_config import AlgorithmConfig
 from ray.rllib.core.learner.torch.torch_learner import TorchLearner
 from ray.rllib.core.learner.torch.torch_meta_learner import TorchMetaLearner
 from ray.rllib.policy.sample_batch import MultiAgentBatch
@@ -9,9 +10,12 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import ModuleID, NamedParamDict, ParamDict, TensorType
 
-from source.brainstorming.config import INTRINSIC_REWARD_MODULE_ID, PPO_AGENT_POLICY_ID
-from source.brainstorming.learners.CustomPPOLearner import CustomPPOLearner
-from source.brainstorming.learners.remove_gae_from_learner_connector import (
+from source.intrinsic_attention_ppo.config import (
+    INTRINSIC_REWARD_MODULE_ID,
+    PPO_AGENT_POLICY_ID,
+)
+from source.intrinsic_attention_ppo.learners.CustomPPOLearner import CustomPPOLearner
+from source.intrinsic_attention_ppo.learners.remove_gae_from_learner_connector import (
     remove_gae_from_learner_connectors,
 )
 
@@ -60,7 +64,7 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner, CustomPPOLearner):
     def configure_optimizers_for_module(
         self,
         module_id: ModuleID,
-        config: "AlgorithmConfig" = None,
+        config: AlgorithmConfig = None,
     ) -> None:
         if module_id in self.get_inner_loop_policies():
             return

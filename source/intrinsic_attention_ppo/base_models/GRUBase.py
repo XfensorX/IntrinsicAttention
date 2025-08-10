@@ -1,6 +1,6 @@
 from ray.rllib.utils.framework import try_import_torch
 
-from source.brainstorming.base_models.ReluMlp import ReluMlp
+from source.intrinsic_attention_ppo.base_models.ReluMlp import ReluMlp
 
 torch, nn = try_import_torch()
 

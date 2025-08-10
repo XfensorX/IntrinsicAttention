@@ -8,9 +8,9 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import TensorType
 
-from source.brainstorming.base_models.GRUBase import GRUBase
-from source.brainstorming.base_models.ReluMlp import ReluMlp
-from source.brainstorming.config import COL_EX_IN_VF_PREDS
+from source.intrinsic_attention_ppo.base_models.GRUBase import GRUBase
+from source.intrinsic_attention_ppo.base_models.ReluMlp import ReluMlp
+from source.intrinsic_attention_ppo.config import COL_EX_IN_VF_PREDS
 
 torch, nn = try_import_torch()
 
