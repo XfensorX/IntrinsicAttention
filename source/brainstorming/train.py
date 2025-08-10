@@ -7,10 +7,12 @@ from source.brainstorming.algorithm.IntrinsicAttentionPPOConfig import (
     IntrinsicAttentionPPOConfig,
 )
 from source.brainstorming.environments.umbrella_chain import create_env
+from source.brainstorming.environments.t_maze_pas import create_env_tmaze
 
 
 def main():
     tune.register_env("Umbrella", create_env)
+    tune.register_env("TMaze", create_env_tmaze)
 
     ray.init()
     config = IntrinsicAttentionPPOConfig()
