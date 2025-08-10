@@ -110,14 +110,12 @@ class IntrinsicAttentionPPOHydraConfig(DifferentiableAlgorithmConfig, PPOConfig)
         module_spec = RLModuleSpec(
             module_class=DifferentiablePPOModule,
             model_config={
-                "obs_embed_dim": 6,
-                "pre_head_embedding_dim": 8,
-                "gru_hidden_size": 32,
-                "gru_num_layers": 2,
-                "attention_v_dim": 15,
-                "attention_qk_dim": 17,
                 "vf_share_layers": True,
+                "embedding_dim": 32,
                 "max_seq_len": cfg.env.length + 1,
+                "policy_head_hidden_sizes": [64],
+                "value_head_hidden_sizes": [64],
+                "embedding_hidden_sizes": [64],
             },
             action_space=self.action_space,
             observation_space=self.observation_space,
@@ -128,7 +126,16 @@ class IntrinsicAttentionPPOHydraConfig(DifferentiableAlgorithmConfig, PPOConfig)
             action_space=self.action_space,
             learner_only=True,
             model_config={
-                "vf_share_layers": True,
+                "intrinsic_reward_network": {
+                    "encoder_hidden_sizes": [],
+                    "encoding_dim": 1,
+                    "num_heads": 1,
+                    "head_hidden_sizes": None,
+                    "layers": [{"type": "attention"}],
+                },
+                "extrinsic_value_hidden_layers": [64, 32],
+                "vf_share_layers": True,  # TODO: validate if this is needed
+                "max_seq_len": cfg.env.length + 1,
             },
         )
         self.evaluation(
@@ -154,7 +161,9 @@ class IntrinsicAttentionPPOHydraConfig(DifferentiableAlgorithmConfig, PPOConfig)
                 }
             ),
             algorithm_config_overrides_per_module={
-                INTRINSIC_REWARD_MODULE_ID: AlgorithmConfig.overrides(lr=0.0005)
+                INTRINSIC_REWARD_MODULE_ID: AlgorithmConfig.overrides(
+                    lr=cfg.intrinsic_learner.lr
+                )
                 # own learning rate for intrinsic reward
             },
         )

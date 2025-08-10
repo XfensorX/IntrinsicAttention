@@ -8,7 +8,6 @@ from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 from ray import tune
 
-from source.environments.umbrella_chain import UmbrellaChainEnv
 from source.experiments.utils.stopper import TrialStopper
 from source.intrinsic_attention_ppo.algorithm.IntrinsicAttentionPPO import (
     IntrinsicAttentionPPO,
@@ -27,7 +26,7 @@ time_path = time.strftime("%Y-%m-%d_%H-%M-%S")
     version_base="1.1",
 )
 def main(cfg: DictConfig) -> None:
-    tune.register_env(cfg.env.name, lambda _: UmbrellaChainEnv(cfg.env.length))
+    # tune.register_env(cfg.env.name, lambda _: UmbrellaChainEnv(cfg.env.length))
     config = IntrinsicAttentionPPOHydraConfig(cfg=cfg)
 
     root_path = Path(get_original_cwd())

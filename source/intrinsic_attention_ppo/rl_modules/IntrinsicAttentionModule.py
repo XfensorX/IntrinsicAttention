@@ -139,7 +139,7 @@ class IntrinsicAttentionModule(TorchRLModule, ValueFunctionAPI):
 
         self.extrinsic_value_network = ReluMlp(
             hidden_layers=cfg.extrinsic_value_hidden_layers,
-            input_size=self.concat_dim,
+            input_size=obs_dim,
             output_size=1,
             output_layer=None,
         )
@@ -203,7 +203,9 @@ class IntrinsicAttentionModule(TorchRLModule, ValueFunctionAPI):
         else:
             intrinsic_rewards = attention_out.squeeze(-1)
 
-        extrinsic_values = self.extrinsic_value_network(stacked_x).squeeze(-1)
+        extrinsic_values = self.extrinsic_value_network(
+            self._ensure_bt(batch[Columns.OBS].float())
+        ).squeeze(-1)
         return {
             Columns.INTRINSIC_REWARDS: intrinsic_rewards,  # (B, T)
             COL_EX_VF_PREDS: extrinsic_values,  # (B, T)
