@@ -35,9 +35,10 @@ Time feature to remove counting requirement
     so we measure memory for the cue, not step-counting ability.
 """
 
-import numpy as np
-import gym
 from typing import Any, Dict, Mapping, Optional
+
+import gymnasium as gym
+import numpy as np
 
 
 def create_env_tmaze(env_config: Optional[Mapping[str, Any]] = None):
@@ -99,9 +100,9 @@ class TMazeMemoryOnly(gym.Env):
         add_timestep: bool = True,
     ):
         super().__init__()
-        assert (
-            corridor_length >= 1 and episode_length == corridor_length + 1
-        ), "For memory-only set episode_length == corridor_length + 1"
+        assert corridor_length >= 1 and episode_length == corridor_length + 1, (
+            "For memory-only set episode_length == corridor_length + 1"
+        )
         self.T = episode_length
         self.L = corridor_length
         self.oracle_length = oracle_length
@@ -134,9 +135,9 @@ class TMazeMemoryOnly(gym.Env):
         # Observation space
         obs_dim = 2 if self.ambiguous_position else 3
         if self.expose_goal:
-            assert (
-                not self.ambiguous_position
-            ), "expose_goal makes env Markov; not for memory-only."
+            assert not self.ambiguous_position, (
+                "expose_goal makes env Markov; not for memory-only."
+            )
         if self.add_timestep:
             obs_dim += 1
 

@@ -108,25 +108,33 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
         module_spec = RLModuleSpec(
             module_class=DifferentiablePPOModule,
             model_config={
-                "obs_embed_dim": 2,
-                "pre_head_embedding_dim": 5,
-                "gru_hidden_size": 3,
-                "gru_num_layers": 1,
-                "attention_v_dim": 15,
-                "attention_qk_dim": 17,
                 "vf_share_layers": True,
-                "max_seq_len": 500,
+                "embedding_dim": 32,
+                "max_seq_len": 100,
+                "policy_head_hidden_sizes": [32, 64, 32],
+                "value_head_hidden_sizes": [32, 64, 32],
+                "embedding_hidden_sizes": [32, 64, 32],
             },
             action_space=self.action_space,
             observation_space=self.observation_space,
         )
+
         intrinsic_reward_module_spec = RLModuleSpec(
             module_class=IntrinsicAttentionModule,
             observation_space=self.observation_space,
             action_space=self.action_space,
             learner_only=True,
             model_config={
-                "vf_share_layers": True,
+                "intrinsic_reward_network": {
+                    "encoder_hidden_sizes": [],
+                    "encoding_dim": 1,
+                    "num_heads": 1,
+                    "head_hidden_sizes": None,
+                    "layers": [{"type": "attention"}],
+                },
+                "extrinsic_value_hidden_layers": [32, 64, 32],
+                "vf_share_layers": True,  # TODO: validate if this is needed
+                "max_seq_len": 500,
             },
         )
 

@@ -159,9 +159,7 @@ class UmbrellaChainEnv(gym.Env):
 
         # Generate next observation (always even on terminal step) --------- #
         observation = self._get_observation()
-        info: Dict = (
-            {}
-        )  # Could add `"need_umbrella": self._need_umbrella` for debugging
+        info: Dict = {}  # Could add `"need_umbrella": self._need_umbrella` for debugging
 
         return observation, float(reward), terminated, truncated, info
 
