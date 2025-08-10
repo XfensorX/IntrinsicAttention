@@ -22,8 +22,8 @@ class ToyPPOLearner(PPOTorchLearner):
     ) -> TensorType:
         self.metrics.log_value(
             key="ActionDist",
-            value=fwd_out[Columns.ACTION_DIST_INPUTS],
-            reduce=None,
+            value=fwd_out[Columns.ACTION_DIST_INPUTS].mean(axis=0),
+            reduce="mean",
             clear_on_reduce=True,
         )
         return super().compute_loss_for_module(
