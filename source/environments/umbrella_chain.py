@@ -1,9 +1,19 @@
-# umbrella_chain_gymnasium.py
+# umbrella_chain_gymnasium_optimized.py
 # -----------------------------------------------------------------------------
 # MIT-style rewrite of DeepMind’s “Umbrella Chain” (bsuite) environment
 # for the Gymnasium API.  Heavily commented for clarity.
 #
 # Original Source: https://github.com/google-deepmind/bsuite/blob/main/bsuite/environments/umbrella_chain.py
+#
+# Notes on this version:
+# - Same semantics as the original file you shared, with micro-optimizations to
+#   reduce RAM churn and per-step allocations:
+#     • Preallocated observation buffer written in-place
+#     • Shared empty info dict (instead of new {} each step)
+#     • Precomputed countdown lookup (values match original float32 rounding)
+#     • NumPy Generator + in-place integer buffer for distractors (no temps)
+#     • Optional copy-on-return (copy_obs) for safety if callers mutate obs
+#     • __slots__ to shrink instance size (handy for many env instances)
 # -----------------------------------------------------------------------------
 from __future__ import annotations
 
@@ -44,11 +54,33 @@ class UmbrellaChainEnv(gym.Env):
     # --------------------------------------------------------------------- #
     # Constructor & helpers                                                 #
     # --------------------------------------------------------------------- #
+    __slots__ = (
+        "chain_length",
+        "n_distractor",
+        "rng",
+        "observation_space",
+        "action_space",
+        "_timestep",
+        "_need_umbrella",
+        "_has_umbrella",
+        "_total_regret",
+        # Preallocated / cached structures for performance:
+        "_obs",
+        "_obs_core_view",
+        "_obs_distr_view",
+        "_countdown_lut",
+        "_distr_int_buf",
+        "copy_obs",
+        "_EMPTY_INFO",
+    )
+
     def __init__(
         self,
         chain_length: int,
         n_distractor: int = 0,
         seed: Optional[int] = None,
+        *,
+        copy_obs: bool = False,  # Return a copy of obs on each API call (safer but slower).
     ) -> None:
         """
         Args
@@ -56,16 +88,20 @@ class UmbrellaChainEnv(gym.Env):
         chain_length : int      – number of time-steps per episode
         n_distractor : int      – number of binary noise features appended to the observation
         seed         : Optional – seed for NumPy’s RNG (determinism / reproducibility)
+        copy_obs     : bool     – if True, .reset()/.step() return a copy of the internal
+                                  observation buffer (prevents accidental downstream mutation).
         """
         super().__init__()
 
         # Basic parameters ------------------------------------------------- #
-        self.chain_length = chain_length
-        self.n_distractor = n_distractor
-        self.rng = np.random.RandomState(seed)
+        self.chain_length = int(chain_length)
+        self.n_distractor = int(n_distractor)
+        self.copy_obs = bool(copy_obs)
+        # Use modern Generator for in-place sampling with "out=" buffers
+        self.rng = np.random.default_rng(seed)
 
-        # Gymnasium spaces -------------------------------------------------- #
-        obs_dim = 3 + n_distractor  # total length of flat observation vector
+        # Gymnasium spaces ------------------------------------------------- #
+        obs_dim = 3 + self.n_distractor  # total length of flat observation vector
         self.observation_space = spaces.Box(
             low=0.0,
             high=1.0,
@@ -81,6 +117,31 @@ class UmbrellaChainEnv(gym.Env):
 
         # Performance statistics (optional) -------------------------------- #
         self._total_regret: float = 0.0  # counts how far from optimal the agent was
+
+        # ---------------- Performance-focused preallocations ----------------
+        # Preallocate observation buffer and convenient views
+        self._obs = np.empty(obs_dim, dtype=np.float32)
+        self._obs_core_view = self._obs[:3]
+        self._obs_distr_view = self._obs[3:] if self.n_distractor else None
+
+        # Small, reusable integer buffer for distractor sampling (0/1 ints)
+        # We write ints here (out=...), then cast into the float32 view without temp arrays.
+        self._distr_int_buf = (
+            np.empty(self.n_distractor, dtype=np.uint8) if self.n_distractor else None
+        )
+
+        # Precompute countdown values with *the same rounding* as the original:
+        # original formula was: float32(1.0 - t / chain_length), for t = 0..chain_length
+        self._countdown_lut = np.array(
+            [
+                np.float32(1.0 - (t / self.chain_length))
+                for t in range(self.chain_length + 1)
+            ],
+            dtype=np.float32,
+        )
+
+        # Shared empty info dict to avoid per-step {} allocation
+        self._EMPTY_INFO: Dict = {}
 
     # --------------------------------------------------------------------- #
     # Gymnasium API                                                         #
@@ -101,16 +162,20 @@ class UmbrellaChainEnv(gym.Env):
         """
         # Respect *external* seeding requests (Gymnasium convention) -------- #
         if seed is not None:
-            self.rng.seed(seed)
+            # Recreate the Generator with the provided seed (deterministic run)
+            self.rng = np.random.default_rng(seed)
 
         # Episode-specific initialisation ----------------------------------- #
         self._timestep = 0
-        self._need_umbrella = self.rng.binomial(1, 0.5)  # hidden coin-flip
-        self._has_umbrella = self.rng.binomial(1, 0.5)  # random initial guess
+        self._need_umbrella = int(self.rng.integers(0, 2))  # hidden coin-flip
+        self._has_umbrella = int(self.rng.integers(0, 2))  # random initial guess
 
-        observation = self._get_observation()
-        info = {"total_regret": self._total_regret}  # could also be {}
-        return observation, info
+        # Build initial observation (in-place) ------------------------------ #
+        self._write_observation()
+
+        # Keep the same info contract as your original version
+        info = {"total_regret": self._total_regret}
+        return (self._obs.copy() if self.copy_obs else self._obs), info
 
     def step(self, action: int) -> Tuple[np.ndarray, float, bool, bool, Dict]:
         """
@@ -129,20 +194,19 @@ class UmbrellaChainEnv(gym.Env):
         info        : dict        – diagnostics (empty)
         """
         # ------------------------- Core transition logic ------------------ #
-        self._timestep += (
-            1  # Gymnasium expects _timestep to be incremented *before* reward
-        )
+        # Gymnasium expects _timestep to be incremented *before* reward
+        t = self._timestep + 1
+        self._timestep = t
 
         # On the *first* step only, allow agent to pick an umbrella -------- #
-        if self._timestep == 1:
+        if t == 1:
             # Clip defensive programming: makes sure  action ∈ {0,1}
-            action = int(action) & 1
-            self._has_umbrella = action
+            self._has_umbrella = int(action) & 1
 
         # ------------------------------------------------------------------ #
         # Determine reward & termination flag                                #
         # ------------------------------------------------------------------ #
-        terminated = self._timestep >= self.chain_length
+        terminated = t >= self.chain_length
         truncated = False  # no external time-limit
 
         if terminated:
@@ -155,41 +219,53 @@ class UmbrellaChainEnv(gym.Env):
                 self._total_regret += 2.0
         else:
             # Intermediate distractor reward (+1 or −1 with equal prob.)
-            reward = 2.0 * self.rng.binomial(1, 0.5) - 1.0
+            reward = float(self.rng.integers(0, 2) * 2 - 1)
 
         # Generate next observation (always even on terminal step) --------- #
-        observation = self._get_observation()
-        info: Dict = {}  # Could add `"need_umbrella": self._need_umbrella` for debugging
-
-        return observation, float(reward), terminated, truncated, info
+        self._write_observation()
+        return (
+            (self._obs.copy() if self.copy_obs else self._obs),
+            reward,
+            terminated,
+            truncated,
+            self._EMPTY_INFO,
+        )
 
     # Gymnasium’s render() & close() are optional – omitted for brevity.
 
     # --------------------------------------------------------------------- #
     # Helper utilities                                                      #
     # --------------------------------------------------------------------- #
-    def _get_observation(self) -> np.ndarray:
+    def _write_observation(self) -> None:
         """
-        Constructs the current observation vector.
+        Constructs the current observation vector (in-place).
 
         • index 0 : Whether an umbrella will be needed at the *end* of episode
         • index 1 : Whether the agent currently holds an umbrella
         • index 2 : Normalised “time to live”  (1 at start → 0 at final step)
         • index 3+: Independent distractor bits
         """
-        obs_len = 3 + self.n_distractor
-        obs = np.zeros(obs_len, dtype=np.float32)
-
+        core = self._obs_core_view
         # Core informative features --------------------------------------- #
-        obs[0] = float(self._need_umbrella)
-        obs[1] = float(self._has_umbrella)
-        obs[2] = 1.0 - self._timestep / self.chain_length
+        core[0] = float(self._need_umbrella)
+        core[1] = float(self._has_umbrella)
+        # Use LUT (matches original float32 rounding exactly)
+        t = self._timestep
+        core[2] = (
+            self._countdown_lut[t] if t < self._countdown_lut.size else np.float32(0.0)
+        )
 
         # Distractors: fresh Bernoulli(0.5) every step --------------------- #
-        if self.n_distractor:
-            obs[3:] = self.rng.binomial(1, 0.5, size=self.n_distractor)
-
-        return obs
+        if self._obs_distr_view is not None:
+            # 1) Fill reusable integer buffer with {0,1} using in-place RNG
+            self.rng.integers(
+                0, 2, size=self._distr_int_buf.shape, out=self._distr_int_buf
+            )
+            # 2) Cast/copy into the float32 observation view without allocating temporaries
+            #    (multiply-by-1.0 with unsafe casting writes float32 in-place)
+            np.multiply(
+                self._distr_int_buf, 1.0, out=self._obs_distr_view, casting="unsafe"
+            )
 
     # --------------------------------------------------------------------- #
     # Optional convenience properties                                       #
