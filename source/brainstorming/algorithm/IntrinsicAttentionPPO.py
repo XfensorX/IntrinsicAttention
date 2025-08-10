@@ -1,5 +1,3 @@
-import copy
-
 import torch
 from ray.rllib.algorithms.ppo import PPO
 from ray.rllib.core.columns import Columns
@@ -46,40 +44,13 @@ class IntrinsicAttentionPPO(PPO):
         Returns:
             Dict with training metrics
         """
+        batch = self.custom_sample_batch()
+        learner_results = self.custom_meta_gradient_update(batch)
+        self.custom_sync_weights(learner_results)
 
-        # 1. Sample episodes from environment
-        ex_episodes = self.custom_sample_episodes()
-
-        ex_batch = self.learner_group._learner._learner_connector(
-            rl_module=self.learner_group._learner.module,
-            episodes=ex_episodes,
-            metrics=self.metrics,
-        )
-
-        # print(f"{ex_batch=}")
-        # print(f"{TrainingData(batch=ex_batch)=}")
-
-        # print(f"{self.learner_group._learner.module=}")
-        # print(f"{self.get_module(INTRINSIC_REWARD_MODULE_ID)=}")
-        # print(f"{self.get_module(PPO_AGENT_POLICY_ID)=}")
-
-        ex_in_batch = self.custom_add_intrinsic_rewards(copy.deepcopy(ex_batch))
-
-        learner_results = self.custom_meta_gradient_update(
-            met_step_batch=ex_batch, inner_step_batch=ex_in_batch
-        )
-
-        # 4. Outer loop: Update the intrinsic reward network via meta-gradient
-        # with self._timers.timeit((TIMERS, META_LEARNER_UPDATE_TIMER)):
-        #     # Use original episodes (without added intrinsic rewards)
-        #     meta_results = self.learner_group.meta_learner.update(
-        #         original_episodes,
-        #         others_training_data=[learner_results],
-        #     )
+    def custom_sync_weights(self, learner_results):
         with self.metrics.log_time((TIMERS, SYNCH_WORKER_WEIGHTS_TIMER)):
-            modules_to_update = set(learner_results[0].keys()) - {
-                ALL_MODULES
-            }  # TODO: Which modules to update here?
+            modules_to_update = set(learner_results[0].keys()) - {ALL_MODULES}
 
             print(f"DEBUG 1: {modules_to_update=}")
             self.env_runner_group.sync_weights(
@@ -104,44 +75,34 @@ class IntrinsicAttentionPPO(PPO):
 
         return episodes
 
-    def custom_add_intrinsic_rewards(self, batch):
-        # print(f"{batch=}")
-        intrinsic_fwd = self.learner_group._learner.module[
-            INTRINSIC_REWARD_MODULE_ID
-        ].forward_inference(batch=batch[PPO_AGENT_POLICY_ID])
-        # print(f"{intrinsic_fwd=}")
-
-        intrinsic_rewards = intrinsic_fwd[Columns.INTRINSIC_REWARDS]
-        intrinsic_coeff = self.config.learner_config_dict["intrinsic_reward_coeff"]
-
-        # Adapt the original rewards
-        batch[PPO_AGENT_POLICY_ID][Columns.REWARDS] = (
-            intrinsic_coeff * intrinsic_rewards
-            + batch[PPO_AGENT_POLICY_ID][Columns.REWARDS]
+    def custom_sample_batch(self):
+        episodes = self.custom_sample_episodes()
+        print(f"DEBUG 2: {self.learner_group._learner._learner_connector.connectors=}")
+        batch = self.learner_group._learner._learner_connector(
+            rl_module=self.learner_group._learner.module,
+            episodes=episodes,
+            metrics=self.metrics,
         )
-
         return batch
 
-    def custom_meta_gradient_update(self, met_step_batch, inner_step_batch):
+    def custom_meta_gradient_update(self, batch):
         with self.metrics.log_time((TIMERS, LEARNER_UPDATE_TIMER)):
             learner_results = self.learner_group.update(  # THis is actully only the MetaLearner
                 batch=MultiAgentBatch(
                     policy_batches={
                         INTRINSIC_REWARD_MODULE_ID: SampleBatch(
-                            **met_step_batch[PPO_AGENT_POLICY_ID],
+                            **batch[PPO_AGENT_POLICY_ID],
                             _max_seq_len=251,  # TODO: load from config
                             _zero_padded=True,
                         ),
                         PPO_AGENT_POLICY_ID: SampleBatch(
-                            **met_step_batch[PPO_AGENT_POLICY_ID],
+                            **batch[PPO_AGENT_POLICY_ID],
                             _max_seq_len=251,  # TODO: load from config
                             _zero_padded=True,
                         ),
                     },
                     env_steps=torch.prod(
-                        torch.tensor(
-                            met_step_batch[PPO_AGENT_POLICY_ID][Columns.OBS].shape[:-1]
-                        )
+                        torch.tensor(batch[PPO_AGENT_POLICY_ID][Columns.OBS].shape[:-1])
                     ),
                 ),
                 timesteps={
@@ -159,27 +120,25 @@ class IntrinsicAttentionPPO(PPO):
                         batch=MultiAgentBatch(
                             policy_batches={
                                 PPO_AGENT_POLICY_ID: SampleBatch(
-                                    **inner_step_batch[PPO_AGENT_POLICY_ID],
+                                    **batch[PPO_AGENT_POLICY_ID],
                                     _max_seq_len=251,  # TODO: load from config
                                     _zero_padded=True,
                                 ),
                                 # TODO: think about if this is correct: (validate that the intrinsic rewards are not used for loss calculation)
                                 INTRINSIC_REWARD_MODULE_ID: SampleBatch(
-                                    **met_step_batch[PPO_AGENT_POLICY_ID],
+                                    **batch[PPO_AGENT_POLICY_ID],
                                     _max_seq_len=251,  # TODO: load from config
                                     _zero_padded=True,
                                 ),
                             },
                             env_steps=torch.prod(
                                 torch.tensor(
-                                    inner_step_batch[PPO_AGENT_POLICY_ID][
-                                        Columns.OBS
-                                    ].shape[:-1]
+                                    batch[PPO_AGENT_POLICY_ID][Columns.OBS].shape[:-1]
                                 )
                             ),
                         ),
                     )
-                ],  # this is the training data for the PPOModule inside the MetaLearner
+                ],
             )
         self.metrics.aggregate(learner_results, key=LEARNER_RESULTS)
         return learner_results

@@ -2,7 +2,6 @@ from ray.rllib.utils.framework import try_import_torch
 
 torch, nn = try_import_torch()
 
-
 # For better Interpretabilty, could be more if it is not working
 NUM_HEADS = 1
 
@@ -26,7 +25,7 @@ class IntrinsicAttention(nn.Module):
 
         # self.reward_layer = ReluMlp([v_dim, v_dim // 2, 1], output_layer=nn.Tanh)
 
-        self.temp_layer = nn.Linear(input_dim, 1)
+        self.temp_layer = nn.Sequential(nn.Linear(input_dim, 1), nn.Linear(1, 1))
 
     def forward(
         self,
