@@ -88,58 +88,51 @@ class IntrinsicAttentionPPO(PPO):
 
     def custom_meta_gradient_update(self, batch):
         with self.metrics.log_time((TIMERS, LEARNER_UPDATE_TIMER)):
-            learner_results = self.learner_group.update(  # THis is actully only the MetaLearner
-                batch=MultiAgentBatch(
-                    policy_batches={
-                        INTRINSIC_REWARD_MODULE_ID: SampleBatch(
-                            **batch[PPO_AGENT_POLICY_ID],
-                            _max_seq_len=251,  # TODO: load from config
-                            _zero_padded=True,
-                        ),
-                        PPO_AGENT_POLICY_ID: SampleBatch(
-                            **batch[PPO_AGENT_POLICY_ID],
-                            _max_seq_len=251,  # TODO: load from config
-                            _zero_padded=True,
+            max_seq_len = self.config.rl_module_spec.module_specs[
+                PPO_AGENT_POLICY_ID
+            ].model_config["max_seq_len"]
+            env_steps = torch.prod(
+                torch.tensor(batch[PPO_AGENT_POLICY_ID][Columns.OBS].shape[:-1])
+            ).item()
+
+            def crete_sample_batch():
+                return SampleBatch(
+                    **batch[PPO_AGENT_POLICY_ID],
+                    _max_seq_len=max_seq_len,
+                    _zero_padded=True,
+                )
+
+            learner_results = (
+                self.learner_group.update(  # THis is actully only the MetaLearner
+                    num_epochs=self.config.num_epochs,
+                    minibatch_size=self.config.minibatch_size,
+                    shuffle_batch_per_epoch=self.config.shuffle_batch_per_epoch,
+                    batch=MultiAgentBatch(
+                        policy_batches={
+                            INTRINSIC_REWARD_MODULE_ID: crete_sample_batch(),
+                            PPO_AGENT_POLICY_ID: crete_sample_batch(),
+                        },
+                        env_steps=env_steps,
+                    ),
+                    timesteps={
+                        NUM_ENV_STEPS_SAMPLED_LIFETIME: (
+                            self.metrics.peek(
+                                (ENV_RUNNER_RESULTS, NUM_ENV_STEPS_SAMPLED_LIFETIME)
+                            )
                         ),
                     },
-                    env_steps=torch.prod(
-                        torch.tensor(batch[PPO_AGENT_POLICY_ID][Columns.OBS].shape[:-1])
-                    ),
-                ),
-                timesteps={
-                    NUM_ENV_STEPS_SAMPLED_LIFETIME: (
-                        self.metrics.peek(
-                            (ENV_RUNNER_RESULTS, NUM_ENV_STEPS_SAMPLED_LIFETIME)
-                        )
-                    ),
-                },
-                num_epochs=self.config.num_epochs,
-                minibatch_size=self.config.minibatch_size,
-                shuffle_batch_per_epoch=self.config.shuffle_batch_per_epoch,
-                others_training_data=[
-                    TrainingData(
-                        batch=MultiAgentBatch(
-                            policy_batches={
-                                PPO_AGENT_POLICY_ID: SampleBatch(
-                                    **batch[PPO_AGENT_POLICY_ID],
-                                    _max_seq_len=251,  # TODO: load from config
-                                    _zero_padded=True,
-                                ),
-                                # TODO: think about if this is correct: (validate that the intrinsic rewards are not used for loss calculation)
-                                INTRINSIC_REWARD_MODULE_ID: SampleBatch(
-                                    **batch[PPO_AGENT_POLICY_ID],
-                                    _max_seq_len=251,  # TODO: load from config
-                                    _zero_padded=True,
-                                ),
-                            },
-                            env_steps=torch.prod(
-                                torch.tensor(
-                                    batch[PPO_AGENT_POLICY_ID][Columns.OBS].shape[:-1]
-                                )
+                    others_training_data=[
+                        TrainingData(
+                            batch=MultiAgentBatch(
+                                policy_batches={
+                                    INTRINSIC_REWARD_MODULE_ID: crete_sample_batch(),
+                                    PPO_AGENT_POLICY_ID: crete_sample_batch(),
+                                },
+                                env_steps=env_steps,
                             ),
-                        ),
-                    )
-                ],
+                        )
+                    ],
+                )
             )
         self.metrics.aggregate(learner_results, key=LEARNER_RESULTS)
         return learner_results

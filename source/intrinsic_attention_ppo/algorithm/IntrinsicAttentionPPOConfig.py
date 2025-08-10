@@ -18,11 +18,11 @@ from source.intrinsic_attention_ppo.config import (
     INTRINSIC_REWARD_MODULE_ID,
     PPO_AGENT_POLICY_ID,
 )
-from source.intrinsic_attention_ppo.learners.intrinsic_meta_learner import (
+from source.intrinsic_attention_ppo.learners.IntrinsicAttentionMetaLearner import (
     IntrinsicAttentionMetaLearner,
 )
-from source.intrinsic_attention_ppo.learners.intrinsic_ppo_learner import (
-    IntrinsicPPOLearner,
+from source.intrinsic_attention_ppo.learners.IntrinsicAttentionPPOLearner import (
+    IntrinsicAttentionPPOLearner,
 )
 from source.intrinsic_attention_ppo.rl_modules.DifferentiablePPOModule import (
     DifferentiablePPOModule,
@@ -44,8 +44,7 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
 
         DifferentiableAlgorithmConfig.__init__(
             self,
-            algo_class=algo_class
-            or IntrinsicAttentionPPO,  # FIXME: does this have to change?
+            algo_class=algo_class or IntrinsicAttentionPPO,
         )
 
         if environment is not None:
@@ -68,7 +67,7 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
             num_env_runners=0,
         )
         diff_learner_config = DifferentiableLearnerConfig(
-            learner_class=IntrinsicPPOLearner,
+            learner_class=IntrinsicAttentionPPOLearner,
             # minibatch_size=251, # Learning: Do NOT set this
             lr=0.01,
             add_default_connectors_to_learner_pipeline=True,

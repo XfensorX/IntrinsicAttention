@@ -10,19 +10,21 @@ from ray.rllib.core.learner.differentiable_learner_config import (
 from ray.rllib.core.rl_module.multi_rl_module import MultiRLModuleSpec
 from ray.rllib.core.rl_module.rl_module import RLModuleSpec
 
-from source.environments.umbrella_chain import (
-    create_env,
-)
+from environments.umbrella_chain import UmbrellaChainEnv
 from source.intrinsic_attention_ppo.algorithm import IntrinsicAttentionPPOConfig
 from source.intrinsic_attention_ppo.config import INTRINSIC_REWARD_MODULE_ID
-from source.intrinsic_attention_ppo.learners.intrinsic_meta_learner import (
+from source.intrinsic_attention_ppo.learners.IntrinsicAttentionMetaLearner import (
     IntrinsicAttentionMetaLearner,
 )
-from source.intrinsic_attention_ppo.learners.intrinsic_ppo_learner import IntrinsicPPOLearner
+from source.intrinsic_attention_ppo.learners.IntrinsicAttentionPPOLearner import IntrinsicAttentionPPOLearner
 from source.intrinsic_attention_ppo.rl_modules import IntrinsicAttentionModule
 from source.intrinsic_attention_ppo.rl_modules.DifferentiablePPOModule import (
     DifferentiablePPOModule,
 )
+
+
+def create_env(config):
+    return UmbrellaChainEnv(200)
 
 
 def sample_task(**kwrgs):
@@ -56,7 +58,7 @@ def main():
 
     # Configure the `DifferentiableLearner`.
     diff_learner_config = DifferentiableLearnerConfig(
-        learner_class=IntrinsicPPOLearner,
+        learner_class=IntrinsicAttentionPPOLearner,
         minibatch_size=14,
         lr=0.01,
     )

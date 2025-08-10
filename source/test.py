@@ -15,7 +15,9 @@ def main():
     ray.init()
     config = IntrinsicAttentionPPOConfig(environment="CartPole-v1")
     algo = config.build_algo()
+
     algo.train()
+    print("Finished")
 
 
 if __name__ == "__main__":

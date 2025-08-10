@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+from ray.rllib.algorithms.algorithm_config import AlgorithmConfig
 from ray.rllib.algorithms.ppo.torch.ppo_torch_learner import PPOTorchLearner
 from ray.rllib.core.learner.torch.torch_differentiable_learner import (
     TorchDifferentiableLearner,
@@ -20,7 +21,7 @@ from source.intrinsic_attention_ppo.learners.remove_gae_from_learner_connector i
 torch, nn = try_import_torch()
 
 
-class IntrinsicPPOLearner(
+class IntrinsicAttentionPPOLearner(
     TorchDifferentiableLearner, CustomPPOLearner
 ):  # This has to be in that order such that differentiableLearner is more important
     """PPO learner that incorporates intrinsic rewards"""
@@ -90,3 +91,17 @@ class IntrinsicPPOLearner(
             PPO_AGENT_POLICY_ID: loss,
             INTRINSIC_REWARD_MODULE_ID: torch.tensor(0.0, device=loss.device),
         }
+
+    @override(PPOTorchLearner)
+    def compute_loss_for_module(
+        self,
+        *,
+        module_id: ModuleID,
+        config: AlgorithmConfig,
+        batch: Dict[str, Any],
+        fwd_out: Dict[str, TensorType],
+    ) -> TensorType:
+        """
+        This is an abstract method and has to be overridden, but we use "compute_losses" instead
+        """
+        raise NotImplementedError()
