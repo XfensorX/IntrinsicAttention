@@ -59,7 +59,7 @@ class IntrinsicAttentionModule(TorchRLModule, ValueFunctionAPI):
 
         return {
             Columns.INTRINSIC_REWARDS: intrinsic_rewards,
-            COL_EX_VF_PREDS: extrinsic_values,
+            COL_EX_VF_PREDS: extrinsic_values.squeeze(-1),
             "attention_weights": attention_weights,
         }
 

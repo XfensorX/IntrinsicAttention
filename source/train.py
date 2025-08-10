@@ -3,6 +3,9 @@ import os
 import ray
 from ray import tune
 
+from intrinsic_attention_ppo.algorithm.IntrinsicAttentionPPO import (
+    IntrinsicAttentionPPO,
+)
 from source.environments.t_maze_pas import create_env_tmaze
 from source.environments.umbrella_chain import UmbrellaChainEnv
 from source.intrinsic_attention_ppo.algorithm.IntrinsicAttentionPPOConfig import (
