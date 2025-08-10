@@ -72,7 +72,7 @@ class CustomPPOLearner(PPOTorchLearner):
                 * config.learner_config_dict["intrinsic_reward_coeff"]
             )
         else:
-            value_predictions_ = fwd_out[PPO_AGENT_POLICY_ID][COL_EX_VF_PREDS]
+            value_predictions_ = fwd_out[INTRINSIC_REWARD_MODULE_ID][COL_EX_VF_PREDS]
 
         advantages, value_targets = compute_gae(
             gamma=gamma,

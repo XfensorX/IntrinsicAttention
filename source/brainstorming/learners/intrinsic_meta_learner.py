@@ -160,7 +160,7 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner, CustomPPOLearner):
             mid: p for mid, p in params.items() if mid in outer_loop_policies
         }
 
-        fwd_out = self._make_functional_call(inner_loop_params, batch)
+        fwd_out = self._make_functional_call(params, batch)
         loss_per_module = self.compute_losses(
             fwd_out=fwd_out, batch=batch, others_loss_per_module=others_loss_per_module
         )

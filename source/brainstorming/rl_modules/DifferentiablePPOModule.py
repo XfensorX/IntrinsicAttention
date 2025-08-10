@@ -10,7 +10,7 @@ from ray.rllib.utils.typing import TensorType
 
 from source.brainstorming.base_models.GRUBase import GRUBase
 from source.brainstorming.base_models.ReluMlp import ReluMlp
-from source.brainstorming.config import COL_EX_IN_VF_PREDS, COL_EX_VF_PREDS
+from source.brainstorming.config import COL_EX_IN_VF_PREDS
 
 torch, nn = try_import_torch()
 
@@ -48,9 +48,9 @@ class DifferentiablePPOModule(TorchRLModule, ValueFunctionAPI):
             [pre_head_embedding_dim, pre_head_embedding_dim, 1], output_layer=None
         )
 
-        self.extrinsic_value_head = ReluMlp(
-            [pre_head_embedding_dim, pre_head_embedding_dim, 1], output_layer=None
-        )
+        # self.extrinsic_value_head = ReluMlp(
+        #     [pre_head_embedding_dim, pre_head_embedding_dim, 1], output_layer=None
+        # )
 
         self.policy_head = ReluMlp(
             [pre_head_embedding_dim, pre_head_embedding_dim, self.action_dim],
@@ -103,7 +103,7 @@ class DifferentiablePPOModule(TorchRLModule, ValueFunctionAPI):
             Columns.STATE_OUT: {"h": state_out},
             # Columns.EMBEDDINGS: gru_embeddings,  # TODO: remove this, as we should not use it outside
             COL_EX_IN_VF_PREDS: self.value_head(gru_embeddings).squeeze(-1),
-            COL_EX_VF_PREDS: self.extrinsic_value_head(gru_embeddings).squeeze(-1),
+            # COL_EX_VF_PREDS: self.extrinsic_value_head(gru_embeddings).squeeze(-1),
         }
 
     @override(ValueFunctionAPI)

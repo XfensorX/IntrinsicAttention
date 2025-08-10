@@ -7,7 +7,9 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import TensorType
 
+from brainstorming.base_models.ReluMlp import ReluMlp
 from source.brainstorming.base_models.IntrinsicAttention import IntrinsicAttention
+from source.brainstorming.config import COL_EX_VF_PREDS
 
 torch, nn = try_import_torch()
 
@@ -30,9 +32,9 @@ class IntrinsicAttentionModule(TorchRLModule, ValueFunctionAPI):
             qk_dim=qk_dim,
         )
 
-        # self.compute_extrinsic_values = ReluMlp(
-        #     [input_dim, input_dim // 2, 1], output_layer=None
-        # )
+        self.compute_extrinsic_values = ReluMlp(
+            [input_dim, input_dim // 2, 1], output_layer=None
+        )
 
         # Feature extraction for observations
         self.obs_encoder = nn.Sequential(
@@ -51,11 +53,11 @@ class IntrinsicAttentionModule(TorchRLModule, ValueFunctionAPI):
         # Get intrinsic rewards from attention mechanism
         intrinsic_rewards, attention_weights = self.intrinsic_attention(encoded_obs)
 
-        # extrinsic_values = self.compute_extrinsic_values(encoded_obs)
+        extrinsic_values = self.compute_extrinsic_values(encoded_obs)
 
         return {
             Columns.INTRINSIC_REWARDS: intrinsic_rewards,
-            # COL_EX_VF_PREDS: extrinsic_values,
+            COL_EX_VF_PREDS: extrinsic_values,
             "attention_weights": attention_weights,
         }
 
