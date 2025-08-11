@@ -105,7 +105,7 @@ uv run pytest
 # 🧪 Running Experiments
 
 <p align="center">
-  <a href="./source/experiments/README.md">
+  <a href="./source/experiments/ReadMe.md">
     <img src="https://img.shields.io/badge/View-Experiment_Docs-green?style=for-the-badge&logoColor=white" alt="Experiment Docs Badge" />
   </a>
 </p>
@@ -115,7 +115,7 @@ uv run pytest
 # 🏗️ Architecture & Algorithm
 
 <p align="center">
-  <a href="./source/intrinsic_attention_ppo/README.md">
+  <a href="./source/intrinsic_attention_ppo/ReadMe.md">
     <img src="https://img.shields.io/badge/View-Algorithm_Docs-blue?style=for-the-badge&logoColor=white" alt="Algorithm Docs Badge" />
   </a>
 </p>

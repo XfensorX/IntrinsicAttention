@@ -17,7 +17,7 @@ the [standard PPO algorithm](https://docs.ray.io/en/latest/rllib/rllib-algorithm
 self-attention mechanism.
 
 <p align="center">
-  <img src="images/MetaIRN.png" alt="Algorithm Overview" width="700"/>
+  <img src="./../../images/MetaIRN.png" alt="Algorithm Overview" width="700"/>
 </p>
 
 Our implementation is structured into **three main subcategories**:
