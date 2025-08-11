@@ -9,10 +9,10 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import TensorType
 
-from intrinsic_attention_ppo.rl_modules.ReluMlp import (
+from source.intrinsic_attention_ppo.config import COL_EX_IN_VF_PREDS
+from source.intrinsic_attention_ppo.rl_modules.ReluMlp import (
     ReluMlp,
 )
-from source.intrinsic_attention_ppo.config import COL_EX_IN_VF_PREDS
 
 torch, nn = try_import_torch()
 
@@ -27,13 +27,6 @@ class DifferentiablePPOModuleConfig(BaseModel):
 
 
 class DifferentiablePPOModule(TorchRLModule, ValueFunctionAPI):
-    """
-    Tips:
-    - use Columns.???? instead of SAMPLEBATCH.??? because this is old API (ChatGPT os often wrong)
-    """
-
-    # This class contains significant contributions from:
-    # https://github.com/ray-project/ray/blob/master/rllib/examples/rl_modules/classes/lstm_containing_rlm.py
     @override(TorchRLModule)
     def setup(self):
         config = DifferentiablePPOModuleConfig.model_validate(self.model_config)

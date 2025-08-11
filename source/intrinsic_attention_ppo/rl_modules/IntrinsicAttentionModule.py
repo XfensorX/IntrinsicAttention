@@ -10,9 +10,10 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import TensorType
 
-# You can keep your existing ReluMlp util for convenience.
-from intrinsic_attention_ppo.rl_modules.ReluMlp import ReluMlp
 from source.intrinsic_attention_ppo.config import COL_ATTENTION_WEIGHTS, COL_EX_VF_PREDS
+
+# You can keep your existing ReluMlp util for convenience.
+from source.intrinsic_attention_ppo.rl_modules.ReluMlp import ReluMlp
 
 torch, nn = try_import_torch()
 
