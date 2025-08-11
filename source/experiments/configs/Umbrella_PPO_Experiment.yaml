@@ -18,7 +18,7 @@ env_steps: 100000
 # PPO Learner Config
 ppo_learner:
   minibatch_size: 1000
-  lr: 0.01
+  lr: 0.0002847858517
   num_epochs: 1
   shuffle_batch_per_epoch: true
   num_learners: 0
@@ -32,17 +32,17 @@ training:
 ppo:
   use_critic: true
   use_gae: true
-  lambda_: 0.95
+  lambda_: 0.9099046732075
   use_kl_loss: true
-  kl_coeff: 0.2
-  kl_target: 0.01
-  vf_loss_coeff: 1.0
-  entropy_coeff: 0.0
-  clip_param: 0.2
-  vf_clip_param: 0.5
+  kl_coeff: 0.7464963036515
+  kl_target: 0.0270990929592
+  vf_loss_coeff: 0.6688075857018
+  entropy_coeff: 0.0090570820258
+  clip_param: 0.1221781641624
+  vf_clip_param: 0.1027808522125
   grad_clip: 0.5
-  hidden_size_1: 64
-  hidden_size_2: 32
+  hidden_size_1: 60
+  hidden_size_2: 90
 
 
 # Environment Runner Settings
@@ -63,33 +63,9 @@ evaluation:
   evaluation_num_env_runners: 1
 
 
-
 # System resources
 num_cpus_for_main_process: 6
 data_dir: ./experiment_data/UmbrellaPPO
 
-
-hydra:
-  sweeper:
-    n_trials: 100
-    budget_variable: env_steps
-    search_space: ${search_space}
-    sweeper_kwargs:
-      optimizer_kwargs:
-        scenario:
-          n_trials: ${hydra.sweeper.n_trials}
-          seed: ${seed}
-          min_budget: 20000
-          max_budget: 100000
-          deterministic: true
-          n_workers: 1
-          output_directory: ./tmp/actor_critic_sweep
-        smac_facade:
-          _target_: smac.facade.multi_fidelity_facade.MultiFidelityFacade
-          _partial_: true
-        intensifier:
-          _target_: smac.facade.multi_fidelity_facade.MultiFidelityFacade.get_intensifier
-          _partial_: true
-          eta: 3
 
 
