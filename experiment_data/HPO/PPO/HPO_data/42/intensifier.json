@@ -1,0 +1,292 @@
+{
+  "incumbent_ids": [
+    67
+  ],
+  "rejected_config_ids": [
+    2,
+    3,
+    4,
+    5,
+    1,
+    7,
+    8,
+    9,
+    10,
+    6,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    11,
+    33,
+    34,
+    35,
+    32,
+    37,
+    38,
+    39,
+    40,
+    36,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    68,
+    41,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85
+  ],
+  "incumbents_changed": 7,
+  "trajectory": [
+    {
+      "config_ids": [
+        1
+      ],
+      "costs": [
+        -0.3
+      ],
+      "trial": 1,
+      "walltime": 708.3040981292725
+    },
+    {
+      "config_ids": [
+        6
+      ],
+      "costs": [
+        -1.5
+      ],
+      "trial": 6,
+      "walltime": 708.3164434432983
+    },
+    {
+      "config_ids": [
+        11
+      ],
+      "costs": [
+        -2.5
+      ],
+      "trial": 11,
+      "walltime": 1422.1782569885254
+    },
+    {
+      "config_ids": [
+        32
+      ],
+      "costs": [
+        -1.7
+      ],
+      "trial": 37,
+      "walltime": 3043.5266633033752
+    },
+    {
+      "config_ids": [
+        36
+      ],
+      "costs": [
+        -0.9
+      ],
+      "trial": 43,
+      "walltime": 3751.171851873398
+    },
+    {
+      "config_ids": [
+        41
+      ],
+      "costs": [
+        -2.1
+      ],
+      "trial": 48,
+      "walltime": 3751.1978549957275
+    },
+    {
+      "config_ids": [
+        67
+      ],
+      "costs": [
+        -2.3
+      ],
+      "trial": 81,
+      "walltime": 6901.826580524445
+    }
+  ],
+  "state": {
+    "tracker": {
+      "0,0": [
+        [
+          0,
+          [
+            {
+              "ppo.clip_param": 0.2907634665594,
+              "ppo.entropy_coeff": 0.0078018754585,
+              "ppo.hidden_size_1": 44,
+              "ppo.hidden_size_2": 83,
+              "ppo.kl_coeff": 0.5901238202442,
+              "ppo.kl_target": 0.0048472064104,
+              "ppo.lambda_": 0.9764751569716,
+              "ppo.vf_clip_param": 0.1082160123219,
+              "ppo.vf_loss_coeff": 0.5302842258152,
+              "ppo_learner.lr": 0.0991143037177,
+              "ppo_learner.num_epochs": 2
+            },
+            {
+              "ppo.clip_param": 0.2977281017819,
+              "ppo.entropy_coeff": 0.0013740777163,
+              "ppo.hidden_size_1": 83,
+              "ppo.hidden_size_2": 85,
+              "ppo.kl_coeff": 0.8589834632723,
+              "ppo.kl_target": 0.0157756184998,
+              "ppo.lambda_": 0.9548925099039,
+              "ppo.vf_clip_param": 0.105412271247,
+              "ppo.vf_loss_coeff": 0.5101240507878,
+              "ppo_learner.lr": 0.0972272580349,
+              "ppo_learner.num_epochs": 2
+            },
+            {
+              "ppo.clip_param": 0.1266464223803,
+              "ppo.entropy_coeff": 0.0074082123317,
+              "ppo.hidden_size_1": 102,
+              "ppo.hidden_size_2": 118,
+              "ppo.kl_coeff": 0.2938208123244,
+              "ppo.kl_target": 0.0122283545639,
+              "ppo.lambda_": 0.9316771641276,
+              "ppo.vf_clip_param": 0.1044959869343,
+              "ppo.vf_loss_coeff": 0.5242749529585,
+              "ppo_learner.lr": 0.0835005268409,
+              "ppo_learner.num_epochs": 1
+            }
+          ]
+        ],
+        [
+          0,
+          [
+            {
+              "ppo.clip_param": 0.2923422339689,
+              "ppo.entropy_coeff": 0.0193530164378,
+              "ppo.hidden_size_1": 122,
+              "ppo.hidden_size_2": 68,
+              "ppo.kl_coeff": 0.4382599147037,
+              "ppo.kl_target": 0.0192699453691,
+              "ppo.lambda_": 0.9393694693699,
+              "ppo.vf_clip_param": 0.1080480063065,
+              "ppo.vf_loss_coeff": 0.993361302221,
+              "ppo_learner.lr": 0.0732650520344,
+              "ppo_learner.num_epochs": 2
+            },
+            {
+              "ppo.clip_param": 0.2880603238834,
+              "ppo.entropy_coeff": 0.0348776201447,
+              "ppo.hidden_size_1": 69,
+              "ppo.hidden_size_2": 89,
+              "ppo.kl_coeff": 0.815346786784,
+              "ppo.kl_target": 0.0137502237036,
+              "ppo.lambda_": 0.956639530517,
+              "ppo.vf_clip_param": 0.4638692276147,
+              "ppo.vf_loss_coeff": 0.716095654984,
+              "ppo_learner.lr": 0.0201475167542,
+              "ppo_learner.num_epochs": 2
+            },
+            {
+              "ppo.clip_param": 0.1454966825929,
+              "ppo.entropy_coeff": 0.0281639288471,
+              "ppo.hidden_size_1": 55,
+              "ppo.hidden_size_2": 128,
+              "ppo.kl_coeff": 0.3311198405172,
+              "ppo.kl_target": 0.0298935074557,
+              "ppo.lambda_": 0.9386697010972,
+              "ppo.vf_clip_param": 0.3606892012207,
+              "ppo.vf_loss_coeff": 0.6192047761606,
+              "ppo_learner.lr": 0.0023574009237,
+              "ppo_learner.num_epochs": 3
+            }
+          ]
+        ]
+      ],
+      "1,0": [
+        [
+          0,
+          [
+            {
+              "ppo.clip_param": 0.1653842751541,
+              "ppo.entropy_coeff": 0.003916182071,
+              "ppo.hidden_size_1": 41,
+              "ppo.hidden_size_2": 89,
+              "ppo.kl_coeff": 0.1139968955823,
+              "ppo.kl_target": 0.0111915673,
+              "ppo.lambda_": 0.9320710096371,
+              "ppo.vf_clip_param": 0.2800004148281,
+              "ppo.vf_loss_coeff": 0.9124390173581,
+              "ppo_learner.lr": 0.0233351264516,
+              "ppo_learner.num_epochs": 1
+            },
+            {
+              "ppo.clip_param": 0.1241404919631,
+              "ppo.entropy_coeff": 0.0173008632398,
+              "ppo.hidden_size_1": 101,
+              "ppo.hidden_size_2": 110,
+              "ppo.kl_coeff": 0.3630434832739,
+              "ppo.kl_target": 0.0132970328907,
+              "ppo.lambda_": 0.9427882832047,
+              "ppo.vf_clip_param": 0.111717244175,
+              "ppo.vf_loss_coeff": 0.5492729856138,
+              "ppo_learner.lr": 0.051764006447,
+              "ppo_learner.num_epochs": 2
+            }
+          ]
+        ]
+      ]
+    },
+    "next_bracket": 0
+  }
+}
