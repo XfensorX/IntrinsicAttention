@@ -51,6 +51,7 @@ class IntrinsicAttentionPPO(PPO):
         batch = self.custom_sample_batch()
         learner_results = self.custom_meta_gradient_update(batch)
         self.custom_sync_weights(learner_results)
+        self.metrics.deactivate_tensor_mode()
 
     def custom_sync_weights(self, learner_results):
         with self.metrics.log_time((TIMERS, SYNCH_WORKER_WEIGHTS_TIMER)):
