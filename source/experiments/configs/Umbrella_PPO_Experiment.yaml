@@ -64,7 +64,7 @@ evaluation:
 
 
 # System resources
-num_cpus_for_main_process: 6
+num_cpus_for_main_process: 2
 data_dir: ./experiment_data/UmbrellaPPO
 
 

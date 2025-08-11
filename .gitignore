@@ -1,5 +1,5 @@
 # Ignore experiment directories
-**data/
+data/
 **multirun/
 **outputs/
 **tmp/
