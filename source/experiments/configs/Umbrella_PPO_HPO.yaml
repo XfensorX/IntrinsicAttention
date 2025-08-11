@@ -1,0 +1,140 @@
+defaults:
+  - override hydra/launcher: ray
+  - override hydra/sweeper: HyperSMAC
+
+env:
+  name: Umbrella
+  length: 50
+
+# Common Parameters
+seed: 42  # Default seed (overridden by sweeper)
+env_steps: 5000
+
+search_space:
+  seed: ${seed}
+  hyperparameters:
+    ppo_learner.lr:
+      type: uniform_float
+      lower: 1e-5
+      upper: 1e-1
+      log: true
+    ppo_learner.num_epochs:
+      type: uniform_int
+      lower: 1
+      upper: 3
+    ppo.lambda_:
+      type: uniform_float
+      lower: 0.9
+      upper: 0.99
+    ppo.kl_coeff:
+      type: uniform_float
+      lower: 0.1
+      upper: 0.9
+    ppo.kl_target:
+      type: uniform_float
+      lower: 0.003
+      upper: 0.03
+    ppo.vf_loss_coeff:
+      type: uniform_float
+      lower: 0.5
+      upper: 1.0
+    ppo.entropy_coeff:
+      type: uniform_float
+      lower: 0.001
+      upper: 0.05
+      log: true
+    ppo.clip_param:
+      type: uniform_float
+      lower: 0.1
+      upper: 0.3
+    ppo.vf_clip_param:
+      type: uniform_float
+      lower: 0.1
+      upper: 0.5
+    ppo.hidden_size_1:
+      type: uniform_int
+      lower: 32
+      upper: 128
+    ppo.hidden_size_2:
+      type: uniform_int
+      lower: 32
+      upper: 128
+
+# PPO Learner Config
+ppo_learner:
+  minibatch_size: 1000
+  lr: 0.01
+  num_epochs: 1
+  shuffle_batch_per_epoch: true
+  num_learners: 0
+
+# Training settings
+training:
+  gamma: 1
+  train_batch_size_per_learner: 5000
+  grad_clip: 0.5
+
+# PPO Algorithm Parameters
+ppo:
+  use_critic: true
+  use_gae: true
+  lambda_: 0.95
+  use_kl_loss: true
+  kl_coeff: 0.2
+  kl_target: 0.01
+  vf_loss_coeff: 1.0
+  entropy_coeff: 0.0
+  clip_param: 0.2
+  vf_clip_param: 0.5
+  hidden_size_1: 64
+  hidden_size_2: 32
+
+
+# Environment Runner Settings
+env_runners:
+  num_env_runners: 0
+  num_cpus_per_env_runner: 1
+  num_envs_per_env_runner: 1
+  gym_env_vectorize_mode: "SYNC"
+  rollout_fragment_length: "auto"
+  batch_mode: "complete_episodes"
+
+# Evaluation Settings
+evaluation:
+  evaluation_interval: 1
+  evaluation_duration: 20
+  evaluation_duration_unit: "episodes"
+  evaluation_force_reset_envs_before_iteration: true
+  evaluation_num_env_runners: 1
+
+
+
+# System resources
+num_cpus_for_main_process: 2
+data_dir: ./data/Umbrella
+
+
+hydra:
+  sweeper:
+    n_trials: 100
+    budget_variable: env_steps
+    search_space: ${search_space}
+    sweeper_kwargs:
+      optimizer_kwargs:
+        scenario:
+          n_trials: ${hydra.sweeper.n_trials}
+          seed: ${seed}
+          min_budget: 20000
+          max_budget: 100000
+          deterministic: true
+          n_workers: 1
+          output_directory: ./tmp/actor_critic_sweep
+        smac_facade:
+          _target_: smac.facade.multi_fidelity_facade.MultiFidelityFacade
+          _partial_: true
+        intensifier:
+          _target_: smac.facade.multi_fidelity_facade.MultiFidelityFacade.get_intensifier
+          _partial_: true
+          eta: 3
+
+
