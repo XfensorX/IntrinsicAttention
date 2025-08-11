@@ -1,9 +1,13 @@
 from typing import Dict, List, Union
 
+import json
 import re
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
+from rliable import library as rly
+from rliable import metrics, plot_utils
 
 PPO_DATA = "./experiment_data/UmbrellaPPO"
 INTRINSICATTENTION_DATA = "./experiment_data/UmbrellaIntrinsicAttentionPPO"
@@ -14,24 +18,25 @@ INTRINSICATTENTION_DATA = "./experiment_data/UmbrellaIntrinsicAttentionPPO"
 
 def collect_result_entries(data_root: Union[str, Path]) -> List[Dict[str, object]]:
     """
-    Durchsuche den gegebenen Datenordner rekursiv nach 'result.json' und liefere
-    eine Liste von Dicts mit:
-      - result_json: Pfad zur jeweiligen 'result.json'
-      - seed: Seed (aus dem Ordnernamen zwei Ebenen über der Datei)
-      - length: Länge des Environments (aus dem Ordnernamen zwei Ebenen über der Datei)
-    Einfach gehalten, ohne umfangreiches Fehlerhandling.
+    Recursively searches the specified data directory for 'result.json' files and extracts metadata for each file.
+
+    Returns a list of dictionaries, each containing:
+        - 'result_json': Path to the result file.
+        - 'seed': Seed value extracted from the directory name.
+        - 'length': Environment length extracted from the directory name.
+
+    Only files matching the expected directory pattern are included.
     """
     root = Path(data_root)
     entries: List[Dict[str, object]] = []
     pattern = re.compile(r"seed(\d+).*length(\d+)", re.IGNORECASE)
 
     for rj in root.rglob("result.json"):
-        # Zwei Ebenen über der Datei: .../<seed_length_dir>/<trial_dir>/result.json
         two_up_name = rj.parent.parent.name
         m = pattern.search(two_up_name)
         if not m:
             print("Pattern passt nicht")
-            continue  # schlicht überspringen, wenn nicht passend
+            continue
         seed = int(m.group(1))
         length = int(m.group(2))
         entries.append(
@@ -44,19 +49,17 @@ def collect_result_entries(data_root: Union[str, Path]) -> List[Dict[str, object
     return entries
 
 
-import json
-
-
 def extract_episode_returns(
     entries: List[Dict[str, object]],
 ) -> List[Dict[str, object]]:
     """
-    Extrahiere aus jeder result.json die Liste der episode_return_mean Werte unter
-    evaluation/env_runners/episode_return_mean.
-    Gibt eine Liste von Dicts zurück mit:
-      - length
-      - seed
-      - episode_return_mean: Liste der Werte aus allen result.json-Dateien
+    Loads the list of episode return means from each result.json file under
+    'evaluation/env_runners/episode_return_mean'.
+
+    Returns a list of dictionaries, each containing:
+        - 'length': Environment length.
+        - 'seed': Seed value.
+        - 'episode_return_mean': List of episode return means for that seed and length.
     """
     results = []
     for entry in entries:
@@ -66,7 +69,6 @@ def extract_episode_returns(
             for line in f:
                 try:
                     data = json.loads(line)
-                    # Extrahiere episode_return_mean, falls vorhanden
                     erm = (
                         data.get("evaluation", {})
                         .get("env_runners", {})
@@ -78,7 +80,6 @@ def extract_episode_returns(
                         raise NotImplementedError
                 except Exception:
                     raise NotImplementedError
-                    continue  # einfach überspringen
 
         results.append(
             {
@@ -92,11 +93,11 @@ def extract_episode_returns(
 
 def aggregate_by_length(results: List[Dict[str, object]]) -> Dict[int, np.ndarray]:
     """
-    Aggregiert die Ausgabe von extract_episode_returns nach length.
-    Gibt ein Dictionary zurück:
-      key: length
-      value: numpy array mit Shape (n_seeds, 1, n_evals)
-    Padding mit np.nan, falls die Listen unterschiedlich lang sind.
+    Aggregates episode return means by environment length.
+
+    Returns a dictionary:
+        key: length
+        value: numpy array of shape (n_seeds, 1, n_evals), padded with np.nan if necessary.
     """
     length_dict: Dict[int, List[List[float]]] = {}
     for entry in results:
@@ -115,43 +116,32 @@ def aggregate_by_length(results: List[Dict[str, object]]) -> Dict[int, np.ndarra
     return out
 
 
-import matplotlib.pyplot as plt
-from rliable import library as rly
-from rliable import metrics, plot_utils
-
-
 def plot_sample_efficiency_comparison(
     ppo_data: Dict[int, np.ndarray],
     intrinsic_data: Dict[int, np.ndarray],
     save_dir="rliable_plots",
 ):
     """
-    Vergleicht PPO und IntrinsicAttentionPPO für jede Länge in einem Sample Efficiency Plot.
-    Speichert die Plots als PNG im angegebenen Verzeichnis.
+    Creates sample efficiency plots for PPO and IntrinsicAttentionPPO for each environment length.
+
+    Plots IQM and confidence intervals over training steps and saves each plot as a PNG file.
     """
     Path(save_dir).mkdir(exist_ok=True)
-    for length in ppo_data.keys():
-        print(f"Länge {length}: PPO-Daten (erste Zeile): {ppo_data[length][0, 0, :]}")
-        print(
-            f"Länge {length}: Intrinsic-Daten (erste Zeile): {intrinsic_data[length][0, 0, :]}"
-        )
+    # Do zeropadding for missing values
     for length, arr in ppo_data.items():
         ppo_data[length] = np.nan_to_num(arr, nan=0.0)
     for length, arr in intrinsic_data.items():
         intrinsic_data[length] = np.nan_to_num(arr, nan=0.0)
     for length in ppo_data.keys():
-        # Daten vorbereiten: Shape (n_seeds, 1, n_evals) -> (n_seeds, n_evals)
-
         ppo_scores = ppo_data[length]
         intrinsic_scores = intrinsic_data[length]
 
-        # RLiable erwartet Dict[str, np.ndarray]
         data = {
             "PPO": ppo_scores,
             "IntrinsicAttentionPPO": intrinsic_scores,
         }
-        # Trainingsschritte: z.B. alle 5000 Schritte evaluiert
-        training_steps = np.arange(ppo_scores.shape[2]) * 5000  # Passe 5000 ggf. an!
+        # Hardcoded Training Step Size
+        training_steps = np.arange(ppo_scores.shape[2]) * 5000
 
         def iqm(scores):
             """
@@ -159,7 +149,7 @@ def plot_sample_efficiency_comparison(
             """
             return np.array(
                 [
-                    metrics.aggregate_mean(scores[..., frame])
+                    metrics.aggregate_iqm(scores[..., frame])
                     for frame in range(scores.shape[-1])
                 ]
             )
@@ -167,16 +157,16 @@ def plot_sample_efficiency_comparison(
         iqm_scores, iqm_cis = rly.get_interval_estimates(data, iqm, reps=10000)
         fig, ax = plt.subplots(figsize=(10, 6))
         plot_utils.plot_sample_efficiency_curve(
-            training_steps / 1000,  # in Tausend Schritten
+            training_steps / 1000,
             iqm_scores,
             iqm_cis,
             algorithms=list(data.keys()),
             xlabel="Training Steps (thousands)",
-            ylabel="IQM Evaluation Return",
+            ylabel="Evaluation Return",
             ax=ax,
         )
         ax.set_title(
-            f"Sample Efficiency: PPO vs IntrinsicAttentionPPO (length={length}) across 10 Seeds"
+            f"Sample Efficiency (IQM ± CI): PPO vs IntrinsicAttentionPPO (length={length}) across 10 Seeds"
         )
         ax.legend()
         ax.grid(True)
@@ -191,52 +181,54 @@ def plot_sample_efficiency_final_vs_length(
     save_path="rliable_plots/sample_efficiency_final_vs_length.png",
 ):
     """
-    Sample Efficiency Plot: x-Achse = Length, y-Achse = IQM der letzten Evaluation (über Seeds) mit Unsicherheiten.
+    Creates a summary plot with environment length on the x-axis and IQM of the final evaluation return (with uncertainty) on the y-axis.
+
+    Plots IQM and confidence intervals for PPO and IntrinsicAttentionPPO across all lengths and saves the plot as a PNG file.
     """
-    import matplotlib.pyplot as plt
-    import numpy as np
-    from rliable import library as rly
-    from rliable import metrics
+    # Do zeropadding for missing values
+    for length, arr in ppo_data.items():
+        ppo_data[length] = np.nan_to_num(arr, nan=0.0)
+    for length, arr in intrinsic_data.items():
+        intrinsic_data[length] = np.nan_to_num(arr, nan=0.0)
 
     lengths = sorted(ppo_data.keys())
+
+    def iqm_last(scores):
+        # scores: (n_seeds, 1, n_evals)
+        return metrics.aggregate_iqm(scores[:, 0, -1])
+
+    # Dict[str, np.ndarray] mit shape (n_seeds, 1, n_evals)
     data = {
-        "PPO": [],
-        "IntrinsicAttentionPPO": [],
+        "PPO": np.stack(
+            [ppo_data[length] for length in lengths], axis=1
+        ),  # shape (n_seeds, len(lengths), 1, n_evals)
+        "IntrinsicAttentionPPO": np.stack(
+            [intrinsic_data[length] for length in lengths], axis=1
+        ),
     }
-    cis = {
-        "PPO": [],
-        "IntrinsicAttentionPPO": [],
-    }
+    for alg in data:
+        data[alg] = np.stack(
+            [data[alg][:, i, 0, -1] for i in range(len(lengths))], axis=1
+        )
 
-    for length in lengths:
-        # Shape: (n_seeds, 1, n_evals)
-        ppo_scores = ppo_data[length][:, 0, -1][:, np.newaxis]  # Shape (n_seeds, 1)
-        intrinsic_scores = intrinsic_data[length][:, 0, -1][:, np.newaxis]
+    def iqm_curve(scores):
+        return np.array(
+            [metrics.aggregate_iqm(scores[:, i]) for i in range(scores.shape[1])]
+        )
 
-        def iqm(scores):
-            return metrics.aggregate_iqm(scores)
+    iqm_scores, iqm_cis = rly.get_interval_estimates(data, iqm_curve, reps=10000)
 
-        scores_dict = {
-            "PPO": ppo_scores,
-            "IntrinsicAttentionPPO": intrinsic_scores,
-        }
-        iqm_scores, iqm_cis = rly.get_interval_estimates(scores_dict, iqm, reps=10000)
-        for alg in data.keys():
-            data[alg].append(iqm_scores[alg])
-            cis[alg].append(iqm_cis[alg])
-
-    # Sample Efficiency Plot (analog zu plot_utils.plot_sample_efficiency_curve)
-    fig, ax = plt.subplots(figsize=(10, 6))
-    for alg, color in zip(data.keys(), ["tab:blue", "tab:orange"]):
-        means = np.array(data[alg])
-        lowers = np.array([ci[0] for ci in cis[alg]])
-        uppers = np.array([ci[1] for ci in cis[alg]])
-        ax.plot(lengths, means, label=alg, color=color)
-        # ax.fill_between(lengths, lowers, uppers, color=color, alpha=0.2)
-
-    ax.set_xlabel("Length")
-    ax.set_ylabel("IQM Final Evaluation Return")
-    ax.set_title("Sample Efficiency: Final Evaluation vs Length (IQM ± CI)")
+    fig, ax = plt.subplots(figsize=(10, 5))
+    plot_utils.plot_sample_efficiency_curve(
+        lengths,
+        iqm_scores,
+        iqm_cis,
+        algorithms=list(data.keys()),
+        xlabel="Length",
+        ylabel="Evaluation Return",
+        ax=ax,
+    )
+    ax.set_title("Final Evaluation vs Length (IQM ± CI) across 10 Seeds")
     ax.legend()
     ax.grid(True)
     plt.tight_layout()
@@ -245,6 +237,7 @@ def plot_sample_efficiency_final_vs_length(
 
 
 if __name__ == "__main__":
+    # Fetch the Data and create the plots
     ppo_entries = collect_result_entries(PPO_DATA)
     intrinsic_entries = collect_result_entries(INTRINSICATTENTION_DATA)
 
@@ -254,16 +247,7 @@ if __name__ == "__main__":
     ppo_data = aggregate_by_length(ppo_episode_returns)
     intrinsic_data = aggregate_by_length(intrinsic_episode_returns)
 
-    # plot_sample_efficiency_comparison(ppo_data, intrinsic_data)
-
-    plot_sample_efficiency_final_vs_length(ppo_data, intrinsic_data)
-    import pprint
-
-    # pprint.pprint(ppo_episode_returns)
-    # pprint.pprint(intrinsic_episode_returns)
-
-    pprint.pprint(ppo_data)
-    pprint.pprint(intrinsic_data)
+    plot_sample_efficiency_comparison(ppo_data, intrinsic_data)
 
     print(len(ppo_entries), "PPO entries found")
     print(len(intrinsic_entries), "Intrinsic Attention entries found")
