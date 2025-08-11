@@ -27,6 +27,10 @@ class DifferentiablePPOModuleConfig(BaseModel):
 
 
 class DifferentiablePPOModule(TorchRLModule, ValueFunctionAPI):
+    """
+    Basic PPO Module with embedding layer and a policy and value head
+    """
+
     @override(TorchRLModule)
     def setup(self):
         config = DifferentiablePPOModuleConfig.model_validate(self.model_config)
