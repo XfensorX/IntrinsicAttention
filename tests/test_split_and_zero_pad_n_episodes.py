@@ -10,7 +10,7 @@ from ray.rllib.utils.postprocessing.zero_padding import (
     split_and_zero_pad_n_episodes as split_np,
 )
 
-from intrinsic_attention_ppo.learners.learner_utils.pytorch_differentiable_funcs import (
+from source.intrinsic_attention_ppo.learners.learner_utils.pytorch_differentiable_funcs import (
     split_and_zero_pad_n_episodes as split_torch,
 )
 
