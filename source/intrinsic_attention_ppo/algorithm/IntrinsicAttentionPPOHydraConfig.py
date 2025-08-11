@@ -111,11 +111,11 @@ class IntrinsicAttentionPPOHydraConfig(DifferentiableAlgorithmConfig, PPOConfig)
             module_class=DifferentiablePPOModule,
             model_config={
                 "vf_share_layers": True,
-                "embedding_dim": 32,
+                "embedding_dim": cfg.ppo.embedding_dim,
                 "max_seq_len": cfg.env.length + 1,
-                "policy_head_hidden_sizes": [64],
-                "value_head_hidden_sizes": [64],
-                "embedding_hidden_sizes": [64],
+                "policy_head_hidden_sizes": [cfg.ppo.policy_head_hidden_size],
+                "value_head_hidden_sizes": [cfg.ppo.value_head_hidden_size],
+                "embedding_hidden_sizes": [cfg.ppo.embedding_hidden_size],
             },
             action_space=self.action_space,
             observation_space=self.observation_space,
@@ -133,7 +133,10 @@ class IntrinsicAttentionPPOHydraConfig(DifferentiableAlgorithmConfig, PPOConfig)
                     "head_hidden_sizes": None,
                     "layers": [{"type": "attention"}],
                 },
-                "extrinsic_value_hidden_layers": [64, 32],
+                "extrinsic_value_hidden_layers": [
+                    cfg.ppo.extrinsic_value_hidden_size_1,
+                    cfg.ppo.extrinsic_value_hidden_size_2,
+                ],
                 "vf_share_layers": True,  # TODO: validate if this is needed
                 "max_seq_len": cfg.env.length + 1,
             },

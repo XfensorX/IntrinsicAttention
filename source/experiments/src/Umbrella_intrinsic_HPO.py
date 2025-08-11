@@ -23,7 +23,7 @@ time_path = time.strftime("%Y-%m-%d_%H-%M-%S")
 
 @hydra.main(
     config_path="../configs/",
-    config_name="Umbrella_intrinsic_Experiment.yaml",
+    config_name="Umbrella_intrinsic_HPO.yaml",
     version_base="1.1",
 )
 def main(cfg: DictConfig) -> None:
@@ -46,10 +46,14 @@ def main(cfg: DictConfig) -> None:
         storage_path=data_path,
         verbose=0,
     )
+    print(f"Type: {type(results)}")
 
-    import pprint
-
-    pprint.pprint(results)
+    for key, item in results.results.items():
+        print(f"Key: {key}")
+        print(f"Item keys: {list(item['evaluation']['env_runners'].keys())}")
+        episode_return_mean = item["evaluation"]["env_runners"]["episode_return_mean"]
+        print(f"{episode_return_mean}")
+        return -episode_return_mean
 
 
 if __name__ == "__main__":

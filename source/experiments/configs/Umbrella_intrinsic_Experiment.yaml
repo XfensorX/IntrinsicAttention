@@ -8,7 +8,7 @@ hydra:
       env.length: 10
 
 env:
-  name: CartPole-v1
+  name: Umbrella
   length: 100
 
 # Common Parameters
@@ -18,8 +18,8 @@ env_steps: 10000
 # PPO Learner Config
 ppo_learner:
   minibatch_size: 200
-  lr: 3.0e-4
-  num_epochs: 2
+  lr: 0.01
+  num_epochs: 1
   shuffle_batch_per_epoch: true
   num_learners: 0  
 
@@ -28,12 +28,12 @@ intrinsic_learner:
   minibatch_size: 200
   shuffle_batch_per_epoch: true
   num_epochs: 2
-  lr: 5.0e-4
-  intrinsic_reward_coeff: 0.00  # Weight of intrinsic rewards
+  lr: 5.0e-3
+  intrinsic_reward_coeff: 0.1  # Weight of intrinsic rewards
 
 # Training settings
 training:
-  gamma: 0.99
+  gamma: 1
   train_batch_size_per_learner: 1000
   grad_clip: 0.5
 
@@ -49,6 +49,12 @@ ppo:
   entropy_coeff: 0.0
   clip_param: 0.2
   vf_clip_param: 0.5
+  extrinsic_value_hidden_size_1: 64
+  extrinsic_value_hidden_size_2: 32
+  policy_head_hidden_size: 64
+  value_head_hidden_size: 64
+  embedding_hidden_size: 64
+  embedding_dim: 32
 
 # Environment Runner Settings
 env_runners:

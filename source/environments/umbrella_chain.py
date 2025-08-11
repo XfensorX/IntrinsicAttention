@@ -212,14 +212,14 @@ class UmbrellaChainEnv(gym.Env):
         if terminated:
             # Final step – reward depends on matching umbrella state
             correct = int(self._has_umbrella == self._need_umbrella)
-            reward = 1.0 if correct else -1.0
+            reward = 10.0 if correct else -10.0
 
             # Track regret: +2 if agent was wrong (optimal would be +1 vs −1)
             if not correct:
                 self._total_regret += 2.0
         else:
             # Intermediate distractor reward (+1 or −1 with equal prob.)
-            reward = float(self.rng.integers(0, 2) * 2 - 1)
+            reward = float((self.rng.integers(0, 2) * 2 - 1) * 0.1)
 
         # Generate next observation (always even on terminal step) --------- #
         self._write_observation()
