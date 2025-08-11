@@ -156,6 +156,7 @@ def plot_sample_efficiency_comparison(
             """
             Compute the Inverse of the Interquartile Mean (IQM) for given scores.
             """
+            return np.mean(scores, axis=0)
             return np.array(
                 [
                     metrics.aggregate_mean(scores[..., frame])

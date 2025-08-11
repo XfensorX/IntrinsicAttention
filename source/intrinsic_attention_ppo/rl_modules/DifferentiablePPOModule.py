@@ -9,7 +9,7 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import TensorType
 
-from source.intrinsic_attention_ppo.base_models.ReluMlp import (
+from intrinsic_attention_ppo.rl_modules.ReluMlp import (
     ReluMlp,
 )
 from source.intrinsic_attention_ppo.config import COL_EX_IN_VF_PREDS
