@@ -68,8 +68,9 @@ def extract_episode_returns(
                     data = json.loads(line)
                     # Extrahiere episode_return_mean, falls vorhanden
                     erm = (
-                        #  data.get("evaluation", {})
-                        data.get("env_runners", {}).get("episode_return_mean")
+                        data.get("evaluation", {})
+                        .get("env_runners", {})
+                        .get("episode_return_mean")
                     )
                     if erm is not None:
                         episode_returns.append(erm)
@@ -156,7 +157,6 @@ def plot_sample_efficiency_comparison(
             """
             Compute the Inverse of the Interquartile Mean (IQM) for given scores.
             """
-            return np.mean(scores, axis=0)
             return np.array(
                 [
                     metrics.aggregate_mean(scores[..., frame])
@@ -172,17 +172,76 @@ def plot_sample_efficiency_comparison(
             iqm_cis,
             algorithms=list(data.keys()),
             xlabel="Training Steps (thousands)",
-            ylabel="Mean Evaluation Return",
+            ylabel="IQM Evaluation Return",
             ax=ax,
         )
         ax.set_title(
-            f"Sample Efficiency: PPO vs IntrinsicAttentionPPO (length={length})"
+            f"Sample Efficiency: PPO vs IntrinsicAttentionPPO (length={length}) across 10 Seeds"
         )
         ax.legend()
         ax.grid(True)
         plt.tight_layout()
         plt.savefig(f"{save_dir}/sample_efficiency_length_{length}.png", dpi=300)
         plt.close(fig)
+
+
+def plot_sample_efficiency_final_vs_length(
+    ppo_data: Dict[int, np.ndarray],
+    intrinsic_data: Dict[int, np.ndarray],
+    save_path="rliable_plots/sample_efficiency_final_vs_length.png",
+):
+    """
+    Sample Efficiency Plot: x-Achse = Length, y-Achse = IQM der letzten Evaluation (über Seeds) mit Unsicherheiten.
+    """
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from rliable import library as rly
+    from rliable import metrics
+
+    lengths = sorted(ppo_data.keys())
+    data = {
+        "PPO": [],
+        "IntrinsicAttentionPPO": [],
+    }
+    cis = {
+        "PPO": [],
+        "IntrinsicAttentionPPO": [],
+    }
+
+    for length in lengths:
+        # Shape: (n_seeds, 1, n_evals)
+        ppo_scores = ppo_data[length][:, 0, -1][:, np.newaxis]  # Shape (n_seeds, 1)
+        intrinsic_scores = intrinsic_data[length][:, 0, -1][:, np.newaxis]
+
+        def iqm(scores):
+            return metrics.aggregate_iqm(scores)
+
+        scores_dict = {
+            "PPO": ppo_scores,
+            "IntrinsicAttentionPPO": intrinsic_scores,
+        }
+        iqm_scores, iqm_cis = rly.get_interval_estimates(scores_dict, iqm, reps=10000)
+        for alg in data.keys():
+            data[alg].append(iqm_scores[alg])
+            cis[alg].append(iqm_cis[alg])
+
+    # Sample Efficiency Plot (analog zu plot_utils.plot_sample_efficiency_curve)
+    fig, ax = plt.subplots(figsize=(10, 6))
+    for alg, color in zip(data.keys(), ["tab:blue", "tab:orange"]):
+        means = np.array(data[alg])
+        lowers = np.array([ci[0] for ci in cis[alg]])
+        uppers = np.array([ci[1] for ci in cis[alg]])
+        ax.plot(lengths, means, label=alg, color=color)
+        # ax.fill_between(lengths, lowers, uppers, color=color, alpha=0.2)
+
+    ax.set_xlabel("Length")
+    ax.set_ylabel("IQM Final Evaluation Return")
+    ax.set_title("Sample Efficiency: Final Evaluation vs Length (IQM ± CI)")
+    ax.legend()
+    ax.grid(True)
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300)
+    plt.close(fig)
 
 
 if __name__ == "__main__":
@@ -195,8 +254,9 @@ if __name__ == "__main__":
     ppo_data = aggregate_by_length(ppo_episode_returns)
     intrinsic_data = aggregate_by_length(intrinsic_episode_returns)
 
-    plot_sample_efficiency_comparison(ppo_data, intrinsic_data)
+    # plot_sample_efficiency_comparison(ppo_data, intrinsic_data)
 
+    plot_sample_efficiency_final_vs_length(ppo_data, intrinsic_data)
     import pprint
 
     # pprint.pprint(ppo_episode_returns)
