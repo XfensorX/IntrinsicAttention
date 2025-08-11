@@ -33,7 +33,7 @@ search_space:
       log: true
     intrinsic_learner.intrinsic_reward_coeff:
       type: uniform_float
-      lower: 0.0
+      lower: 0.001
       upper: 1.0
       log: true
     intrinsic_learner.num_epochs:
@@ -63,7 +63,7 @@ search_space:
       upper: 1.0
     ppo.entropy_coeff:
       type: uniform_float
-      lower: 0.0
+      lower: 0.001
       upper: 0.05
       log: true
     ppo.clip_param:
@@ -161,7 +161,7 @@ evaluation:
 
 
 # System resources
-num_cpus_for_main_process: 6
+num_cpus_for_main_process: 3
 data_dir: ./data/Umbrella
 
 
@@ -178,7 +178,7 @@ hydra:
           min_budget: 20000
           max_budget: 100000
           deterministic: true
-          n_workers: 5
+          n_workers: 1
           output_directory: ./tmp/actor_critic_sweep
         smac_facade: 
           _target_: smac.facade.multi_fidelity_facade.MultiFidelityFacade

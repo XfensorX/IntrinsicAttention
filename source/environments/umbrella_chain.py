@@ -142,6 +142,8 @@ class UmbrellaChainEnv(gym.Env):
         # Shared empty info dict to avoid per-step {} allocation
         self._EMPTY_INFO: Dict = {}
 
+        self.reset(seed=seed)
+
     # --------------------------------------------------------------------- #
     # Gymnasium API                                                         #
     # --------------------------------------------------------------------- #
@@ -216,7 +218,7 @@ class UmbrellaChainEnv(gym.Env):
                 self._total_regret += 2.0
         else:
             # Intermediate distractor reward (+1 or −1 with equal prob.)
-            reward = float((self.rng.integers(0, 2) * 2 - 1) * 0.5)
+            reward = float((self.np_random.integers(0, 2) * 2 - 1) * 0.5)
 
         # Generate next observation (always even on terminal step) --------- #
         self._write_observation()

@@ -1,5 +1,6 @@
 import os
 import time
+import uuid
 from pathlib import Path
 
 import hydra
@@ -17,7 +18,7 @@ from source.intrinsic_attention_ppo.algorithm.IntrinsicAttentionPPOHydraConfig i
     IntrinsicAttentionPPOHydraConfig,
 )
 
-ray.init()
+ray.init(RAY_memory_monitor_refresh_ms=0)
 time_path = time.strftime("%Y-%m-%d_%H-%M-%S")
 
 
@@ -40,21 +41,19 @@ def main(cfg: DictConfig) -> None:
 
     stopper = TrialStopper(cfg.env_steps)
 
+    run_uuid = uuid.uuid4().hex
+
     results = tune.run(
         IntrinsicAttentionPPO,
         config=config.to_dict(),
-        name=f"IntrinsicAttentionPPO_seed{cfg.seed}_length{cfg.env.length}",
+        name=f"IntrinsicAttentionPPO_seed{cfg.seed}_length{cfg.env.length}_{run_uuid[:6]}",
         stop=stopper,
         storage_path=data_path,
         verbose=0,
     )
-    print(f"Type: {type(results)}")
 
     for key, item in results.results.items():
-        print(f"Key: {key}")
-        print(f"Item keys: {list(item['evaluation']['env_runners'].keys())}")
         episode_return_mean = item["evaluation"]["env_runners"]["episode_return_mean"]
-        print(f"{episode_return_mean}")
         return -episode_return_mean
 
 
