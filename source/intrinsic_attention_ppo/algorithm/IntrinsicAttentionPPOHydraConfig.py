@@ -34,7 +34,7 @@ from source.intrinsic_attention_ppo.rl_modules.IntrinsicAttentionModule import (
 
 
 class IntrinsicAttentionPPOHydraConfig(DifferentiableAlgorithmConfig, PPOConfig):
-    """Configuration for PPO with intrinsic attention rewards"""
+    """Configuration for PPO with intrinsic attention rewards using a hydra config."""
 
     def __init__(self, algo_class=None, cfg: DictConfig | None = None):
         PPOConfig.__init__(self, algo_class=algo_class or IntrinsicAttentionPPO)
@@ -137,7 +137,7 @@ class IntrinsicAttentionPPOHydraConfig(DifferentiableAlgorithmConfig, PPOConfig)
                     cfg.ppo.extrinsic_value_hidden_size_1,
                     cfg.ppo.extrinsic_value_hidden_size_2,
                 ],
-                "vf_share_layers": True,  # TODO: validate if this is needed
+                "vf_share_layers": True,
                 "max_seq_len": cfg.env.length + 1,
             },
         )

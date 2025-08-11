@@ -100,6 +100,7 @@ source/
 ├── experiments/
 │   ├── configs/      # Hydra configuration files
 │   ├── src/          # Experiment run scripts
+│   ├── plots/        # Plot Generation from experiment results
 │   └── utils/        # Helper functions (if applicable)
 experiment_data/
 ├── hpo/              # Results from hyperparameter optimization

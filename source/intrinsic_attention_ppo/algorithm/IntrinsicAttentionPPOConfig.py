@@ -35,12 +35,8 @@ from source.intrinsic_attention_ppo.rl_modules.IntrinsicAttentionModule import (
 class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
     """Configuration for PPO with intrinsic attention rewards"""
 
-    # TODO: Noch etwas lost hier alles
-
     def __init__(self, algo_class=None, environment=None):
-        PPOConfig.__init__(
-            self, algo_class=algo_class or IntrinsicAttentionPPO
-        )  # FIXME: was intrinsicattention PPO
+        PPOConfig.__init__(self, algo_class=algo_class or IntrinsicAttentionPPO)
 
         DifferentiableAlgorithmConfig.__init__(
             self,
@@ -133,7 +129,7 @@ class IntrinsicAttentionPPOConfig(DifferentiableAlgorithmConfig, PPOConfig):
                     "layers": [{"type": "attention"}],
                 },
                 "extrinsic_value_hidden_layers": [32, 64, 32],
-                "vf_share_layers": True,  # TODO: validate if this is needed
+                "vf_share_layers": True,
                 "max_seq_len": 500,
             },
         )

@@ -54,6 +54,7 @@ class IntrinsicAttentionPPO(PPO):
         self.metrics.deactivate_tensor_mode()
 
     def custom_sync_weights(self, learner_results):
+        """Synchronize learner weights with intrinsic reward network"""
         with self.metrics.log_time((TIMERS, SYNCH_WORKER_WEIGHTS_TIMER)):
             modules_to_update = set(learner_results[0].keys()) - {ALL_MODULES}
 
@@ -65,6 +66,7 @@ class IntrinsicAttentionPPO(PPO):
             )
 
     def custom_sample_episodes(self):
+        """Sample Episodes from the environment"""
         with self.metrics.log_time((TIMERS, ENV_RUNNER_SAMPLING_TIMER)):
             # Sample in parallel from the workers.
             episodes, env_runner_results = synchronous_parallel_sample(
@@ -80,6 +82,7 @@ class IntrinsicAttentionPPO(PPO):
         return episodes
 
     def custom_sample_batch(self):
+        """Create a batch by sampling from the environment and pass it through the learner connectors"""
         episodes = self.custom_sample_episodes()
         batch = self.learner_group._learner._learner_connector(
             rl_module=self.learner_group._learner.module,
@@ -89,6 +92,9 @@ class IntrinsicAttentionPPO(PPO):
         return batch
 
     def custom_meta_gradient_update(self, batch):
+        """
+        Run one iteration of meta-gradient update
+        """
         with self.metrics.log_time((TIMERS, LEARNER_UPDATE_TIMER)):
             max_seq_len = self.config.rl_module_spec.module_specs[
                 PPO_AGENT_POLICY_ID

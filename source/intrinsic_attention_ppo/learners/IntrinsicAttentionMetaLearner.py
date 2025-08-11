@@ -1,3 +1,11 @@
+"""
+Meta-Learner:
+        •	Computes PPO losses while optionally integrating intrinsic rewards.
+        •	Adapts to connector pipelines (e.g., removes GAE at the learner stage when needed).
+        •	Propagates outer-loop PPO gradients and synchronizes them with inner-loop, differentiable
+policies for meta-learning.
+"""
+
 from typing import Any, Dict, List
 
 import contextlib
@@ -45,6 +53,7 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner, CustomPPOLearner):
         others_loss_per_module: List[Dict[ModuleID, TensorType]] = None,
         **kwargs,
     ) -> Dict[str, Any]:
+        """Compute Outer llop ppo loss without the intrinsic rewards."""
         loss = self.compute_ppo_loss(
             config=self.config.get_config_for_module(PPO_AGENT_POLICY_ID),
             batch=batch,
@@ -66,6 +75,8 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner, CustomPPOLearner):
         module_id: ModuleID,
         config: AlgorithmConfig = None,
     ) -> None:
+        """Optimizers have to be configured manually in order to
+        prevent creation of optimizers for models of the inner looop"""
         if module_id in self.get_inner_loop_policies():
             return
 
@@ -103,6 +114,9 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner, CustomPPOLearner):
         params: Dict[ModuleID, NamedParamDict],
         **kwargs,
     ) -> ParamDict:
+        """
+        Compute Second order gradients
+        """
         if self._grad_scalers is not None:
             total_loss = sum(
                 self._grad_scalers[mid].scale(loss)
@@ -195,6 +209,9 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner, CustomPPOLearner):
     def update_gradients_from_inner_loop(
         self, inner_loop_parameters: Dict[ModuleID, NamedParamDict]
     ):
+        """
+        Update the inner loop modules correctly with the updated params already provided.
+        """
         inner_loop_policies = self.get_inner_loop_policies()
 
         # 1) Write fast weights into the module WITHOUT building a graph

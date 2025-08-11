@@ -1,7 +1,6 @@
 defaults:
   - override hydra/launcher: ray
 
-#TODO: Check reproducibility. Setting seed via debugging and just on env with one learner might work
 hydra:
   sweeper:
     params:

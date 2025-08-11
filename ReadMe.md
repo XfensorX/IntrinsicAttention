@@ -185,6 +185,48 @@ note = {Code: https://github.com/XfensorX/IntrinsicAttention}
 
 ---
 
+# 📚 References
+
+1. Jiang, Z., Tian, D., Yang, Q., & Peng, Z. (2021). *Self-Attention based Temporal Intrinsic Reward for Reinforcement
+   Learning*. In **2021 China Automation Congress (CAC)** (pp. 2022–2026).
+   IEEE. [https://doi.org/10.1109/CAC53003.2021.9727314](https://doi.org/10.1109/CAC53003.2021.9727314)
+
+2. Wu, Z., Liang, E., Luo, M., Mika, S., Gonzalez, J. E., & Stoica, I. (2021). *RLlib Flow: Distributed Reinforcement
+   Learning is a Dataflow Problem*. In **Conference on Neural Information Processing Systems (NeurIPS)
+   **. [PDF](https://proceedings.neurips.cc/paper/2021/file/2bce32ed409f5ebcee2a7b417ad9beed-Paper.pdf)
+
+3. Agarwal, R., Schwarzer, M., Castro, P. S., Courville, A. C., & Bellemare, M. G. (2021). *Deep Reinforcement Learning
+   at the Edge of the Statistical Precipice*. In **Advances in Neural Information Processing Systems 34 (NeurIPS 2021)
+   ** (pp.
+   29304–29320). [Abstract](https://proceedings.neurips.cc/paper/2021/hash/f514cec81cb148559cf475e7426eed5e-Abstract.html)
+
+4. Ross, O. D. I., & L’Hermitte, J. (2020). *Hydra: A framework for elegantly configuring complex applications*. *
+   *Journal of Open Source Software, 5**(52),
+   2415. [https://doi.org/10.21105/joss.02415](https://doi.org/10.21105/joss.02415)
+
+5. Osband, I., Doron, Y., Hessel, M., Aslanides, J., Sezener, E., Saraiva, A., McKinney, K., Lattimore, T., Szepesvári,
+   C., Singh, S., Van Roy, B., Sutton, R. S., Silver, D., & van Hasselt, H. (2020). *Behaviour Suite for Reinforcement
+   Learning*. In **8th International Conference on Learning Representations (ICLR 2020)
+   **. [OpenReview](https://openreview.net/forum?id=rygf-kSYwH)
+
+6. Ni, T., Ma, M., Eysenbach, B., & Bacon, P.-L. (2023). *When Do Transformers Shine in RL? Decoupling Memory from
+   Credit Assignment*. In **Advances in Neural Information Processing Systems 36 (NeurIPS 2023)
+   **. [Abstract](http://papers.nips.cc/paper_files/paper/2023/hash/9dc5accb1e4f4a9798eae145f2e4869b-Abstract-Conference.html)
+
+7. Pignatelli, E., Ferret, J., Geist, M., Mesnard, T., van Hasselt, H., & Toni, L. (2024). *A Survey of Temporal Credit
+   Assignment in Deep Reinforcement Learning*. **Transactions on Machine Learning Research, 2024
+   **. [OpenReview](https://openreview.net/forum?id=bNtr6SLgZf)
+
+8. Zheng, Z., Oh, J., & Singh, S. (2018). *On Learning Intrinsic Rewards for Policy Gradient Methods*. In **Proceedings
+   of the 32nd International Conference on Neural Information Processing Systems (NIPS’18)** (pp. 4649–4659). Curran
+   Associates, Inc.
+
+9. Lindauer, M., Eggensperger, K., Feurer, M., Biedenkapp, A., Deng, D., Benjamins, C., Ruhkopf, T., Sass, R., & Hutter,
+   F. (2022). *SMAC3: A Versatile Bayesian Optimization Package for Hyperparameter Optimization*. **Journal of Machine
+   Learning Research, 23**(54), 1–9. [http://jmlr.org/papers/v23/21-0888.html](http://jmlr.org/papers/v23/21-0888.html)
+
+---
+
 # Important Documentation Linked
 
 # Docs RLlib

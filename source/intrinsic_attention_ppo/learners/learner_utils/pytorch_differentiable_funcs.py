@@ -30,9 +30,7 @@ def unpad_data_if_necessary(
     for len_ in episode_lens:
         # Calculate how many full rows this array occupies and how many elements are
         # in the last, potentially partial row.
-        num_rows, col_idx = divmod(
-            int(len_), T
-        )  # TODO; check that this int-cast does not break differentiability
+        num_rows, col_idx = divmod(int(len_), T)
 
         # If the array spans multiple full rows, fully include these rows.
         for i in range(num_rows):

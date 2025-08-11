@@ -1,3 +1,14 @@
+"""
+Learner implementation for PPO with intrinsic rewards on top of RLlib’s Torch stack.
+
+IntrinsicAttentionPPOLearner:
+        •	Computes gradients with torch.autograd.grad to support higher-order objectives.
+        •	Integrates intrinsic rewards into PPO loss computation.
+        •	Removes GAE from learner connectors when required and supports a one-timestep episode
+augmentation used by certain connector pipelines.
+
+"""
+
 from typing import Any, Dict
 
 from ray.rllib.algorithms.algorithm_config import AlgorithmConfig
@@ -24,12 +35,27 @@ torch, nn = try_import_torch()
 class IntrinsicAttentionPPOLearner(
     TorchDifferentiableLearner, CustomPPOLearner
 ):  # This has to be in that order such that differentiableLearner is more important
-    """PPO learner that incorporates intrinsic rewards"""
+    """
+    Differentiable PPO learner with intrinsic rewards.
 
-    custom_use_ppo_torch_learner: bool = False
+    This class combines TorchDifferentiableLearner and a project-specific CustomPPOLearner.
+    The MRO is intentional: TorchDifferentiableLearner must precede CustomPPOLearner so
+    differentiable capabilities (e.g., higher-order grads) take precedence.
+
+    Notes
+        •	Uses compute_losses (module-level loss dict) instead of compute_loss_for_module.
+        •	Detects whether an “AddOneTsToEpisodesAndTruncate” connector is present and adapts loss
+    computation accordingly.
+    """
 
     @override(TorchDifferentiableLearner)
     def build(self, device) -> None:
+        """
+            Side Effects
+            •	Calls PPOTorchLearner.build(self) to compensate for a missing super().build() in
+        RLlib’s differentiable learner.
+            •	Removes GAE from learner connectors
+        """
         # Initialize the base learner
         super().build(device=device)
         PPOTorchLearner.build(
@@ -48,7 +74,9 @@ class IntrinsicAttentionPPOLearner(
         params: Dict[ModuleID, NamedParamDict],
         **kwargs,
     ) -> Dict[ModuleID, NamedParamDict]:
-        # TODO (simon): Add grad scalers later.
+        """
+        Compute per-module named gradients for higher-order optimization.
+        """
         total_loss = sum(loss_per_module.values())
 
         grads = torch.autograd.grad(
@@ -77,6 +105,9 @@ class IntrinsicAttentionPPOLearner(
     def compute_losses(
         self, *, fwd_out: Dict[str, Any], batch: Dict[str, Any]
     ) -> Dict[str, Any]:
+        """
+        Compute PPO losses with intrinsic rewards and connector-aware options.
+        """
         loss = self.compute_ppo_loss(
             config=self.config.get_config_for_module(PPO_AGENT_POLICY_ID),
             batch=batch,
