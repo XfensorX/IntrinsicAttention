@@ -11,8 +11,8 @@ from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import TensorType
 
 # You can keep your existing ReluMlp util for convenience.
-from source.intrinsic_attention_ppo.base_models.ReluMlp import ReluMlp
-from source.intrinsic_attention_ppo.config import COL_EX_VF_PREDS
+from intrinsic_attention_ppo.rl_modules.ReluMlp import ReluMlp
+from source.intrinsic_attention_ppo.config import COL_ATTENTION_WEIGHTS, COL_EX_VF_PREDS
 
 torch, nn = try_import_torch()
 
@@ -209,7 +209,7 @@ class IntrinsicAttentionModule(TorchRLModule, ValueFunctionAPI):
         return {
             Columns.INTRINSIC_REWARDS: intrinsic_rewards,  # (B, T)
             COL_EX_VF_PREDS: extrinsic_values,  # (B, T)
-            "attention_weights": attn_stack,  # (B, L_attn, H, T, T)
+            COL_ATTENTION_WEIGHTS: attn_stack,  # (B, L_attn, H, T, T)
         }
 
     @override(TorchRLModule)
