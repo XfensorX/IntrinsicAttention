@@ -148,7 +148,7 @@ evaluation:
 
 
 # System resources
-num_cpus_for_main_process: 2
+num_cpus_for_main_process: 6
 data_dir: ./data/Umbrella
 
 

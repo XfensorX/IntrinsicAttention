@@ -17,7 +17,7 @@ def get_ppo_config(cfg: DictConfig) -> PPOConfig:
             rl_module_spec=RLModuleSpec(
                 model_config=DefaultModelConfig(
                     vf_share_layers=True,
-                    fcnet_hiddens=[cfg.module.hidden_size_1, cfg.module.hidden_size_2],
+                    fcnet_hiddens=[cfg.ppo.hidden_size_1, cfg.ppo.hidden_size_2],
                 ),
             )
         )
