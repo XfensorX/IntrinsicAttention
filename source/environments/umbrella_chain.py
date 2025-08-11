@@ -98,7 +98,6 @@ class UmbrellaChainEnv(gym.Env):
         self.n_distractor = int(n_distractor)
         self.copy_obs = bool(copy_obs)
         # Use modern Generator for in-place sampling with "out=" buffers
-        self.rng = np.random.default_rng(seed)
 
         # Gymnasium spaces ------------------------------------------------- #
         obs_dim = 3 + self.n_distractor  # total length of flat observation vector
@@ -160,15 +159,13 @@ class UmbrellaChainEnv(gym.Env):
         observation : np.ndarray  – shape (obs_dim,)
         info        : dict        – contains cumulative statistics (can be empty)
         """
-        # Respect *external* seeding requests (Gymnasium convention) -------- #
-        if seed is not None:
-            # Recreate the Generator with the provided seed (deterministic run)
-            self.rng = np.random.default_rng(seed)
+        super().reset(seed=seed, options=options)
 
+        # Respect *external* seeding requests (Gymnasium convention) -------- #
         # Episode-specific initialisation ----------------------------------- #
         self._timestep = 0
-        self._need_umbrella = int(self.rng.integers(0, 2))  # hidden coin-flip
-        self._has_umbrella = int(self.rng.integers(0, 2))  # random initial guess
+        self._need_umbrella = int(self.np_random.integers(0, 2))  # hidden coin-flip
+        self._has_umbrella = int(self.np_random.integers(0, 2))  # random initial guess
 
         # Build initial observation (in-place) ------------------------------ #
         self._write_observation()
@@ -258,7 +255,7 @@ class UmbrellaChainEnv(gym.Env):
         # Distractors: fresh Bernoulli(0.5) every step --------------------- #
         if self._obs_distr_view is not None:
             # 1) Fill reusable integer buffer with {0,1} using in-place RNG
-            self.rng.integers(
+            self.np_random.integers(
                 0, 2, size=self._distr_int_buf.shape, out=self._distr_int_buf
             )
             # 2) Cast/copy into the float32 observation view without allocating temporaries
