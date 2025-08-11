@@ -7,7 +7,7 @@ from ray.rllib.utils.postprocessing.value_predictions import (
     compute_value_targets as compute_value_targets_rllib,
 )
 
-from source.intrinsic_attention_ppo.learners.pytorch_differentiable_funcs import (
+from intrinsic_attention_ppo.learners.learner_utils.pytorch_differentiable_funcs import (
     compute_value_targets,
     unpad_data_if_necessary,
 )

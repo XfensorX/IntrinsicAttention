@@ -13,14 +13,14 @@ from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.torch_utils import explained_variance
 from ray.rllib.utils.typing import ModuleID
 
+from intrinsic_attention_ppo.learners.learner_utils.pytorch_differentiable_funcs import (
+    compute_gae,
+)
 from source.intrinsic_attention_ppo.config import (
     COL_EX_IN_VF_PREDS,
     COL_EX_VF_PREDS,
     INTRINSIC_REWARD_MODULE_ID,
     PPO_AGENT_POLICY_ID,
-)
-from source.intrinsic_attention_ppo.learners.pytorch_differentiable_funcs import (
-    compute_gae,
 )
 
 torch, nn = try_import_torch()
