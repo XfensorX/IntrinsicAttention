@@ -68,14 +68,17 @@ def extract_episode_returns(
                     data = json.loads(line)
                     # Extrahiere episode_return_mean, falls vorhanden
                     erm = (
-                        data.get("evaluation", {})
-                        .get("env_runners", {})
-                        .get("episode_return_mean")
+                        #  data.get("evaluation", {})
+                        data.get("env_runners", {}).get("episode_return_mean")
                     )
                     if erm is not None:
                         episode_returns.append(erm)
+                    else:
+                        raise NotImplementedError
                 except Exception:
+                    raise NotImplementedError
                     continue  # einfach überspringen
+
         results.append(
             {
                 "length": entry["length"],
@@ -106,6 +109,7 @@ def aggregate_by_length(results: List[Dict[str, object]]) -> Dict[int, np.ndarra
         max_len = max(len(l) for l in returns_list)
         padded = [l + [np.nan] * (max_len - len(l)) for l in returns_list]
         arr = np.array(padded, dtype=float)  # Shape (n_seeds, n_evals)
+        arr = arr[:, np.newaxis, :]  # Shape (n_seeds, 1, n_evals)
         out[length] = arr
     return out
 
@@ -125,39 +129,28 @@ def plot_sample_efficiency_comparison(
     Speichert die Plots als PNG im angegebenen Verzeichnis.
     """
     Path(save_dir).mkdir(exist_ok=True)
-    for length in sorted(ppo_data.keys()):
+    for length in ppo_data.keys():
+        print(f"Länge {length}: PPO-Daten (erste Zeile): {ppo_data[length][0, 0, :]}")
+        print(
+            f"Länge {length}: Intrinsic-Daten (erste Zeile): {intrinsic_data[length][0, 0, :]}"
+        )
+    for length, arr in ppo_data.items():
+        ppo_data[length] = np.nan_to_num(arr, nan=0.0)
+    for length, arr in intrinsic_data.items():
+        intrinsic_data[length] = np.nan_to_num(arr, nan=0.0)
+    for length in ppo_data.keys():
         # Daten vorbereiten: Shape (n_seeds, 1, n_evals) -> (n_seeds, n_evals)
+
         ppo_scores = ppo_data[length]
         intrinsic_scores = intrinsic_data[length]
+
         # RLiable erwartet Dict[str, np.ndarray]
         data = {
             "PPO": ppo_scores,
             "IntrinsicAttentionPPO": intrinsic_scores,
         }
         # Trainingsschritte: z.B. alle 5000 Schritte evaluiert
-        training_steps = np.arange(ppo_scores.shape[1]) * 5000  # Passe 5000 ggf. an!
-
-        for length, arr in ppo_data.items():
-            ppo_data[length] = np.nan_to_num(arr, nan=0.0)
-        for length, arr in intrinsic_data.items():
-            intrinsic_data[length] = np.nan_to_num(arr, nan=0.0)
-
-        for name, arr in data.items():
-            print(f"{name}: shape={arr.shape}, dtype={arr.dtype}")
-
-        for name, arr in data.items():
-            print(f"{name}: shape={arr.shape}, dtype={arr.dtype}")
-            # Prüfe für jeden Frame, ob alle Werte NaN sind
-            for frame in range(arr.shape[1]):
-                frame_values = arr[:, frame]
-                nan_count = np.sum(np.isnan(frame_values))
-                print(
-                    f"{name} frame {frame}: NaN count = {nan_count} / {len(frame_values)}"
-                )
-                if nan_count == len(frame_values):
-                    print(f"Alle Werte in {name} frame {frame} sind NaN!")
-                if frame_values.size == 0:
-                    print(f"{name} frame {frame} ist leer!")
+        training_steps = np.arange(ppo_scores.shape[2]) * 5000  # Passe 5000 ggf. an!
 
         def iqm(scores):
             """
