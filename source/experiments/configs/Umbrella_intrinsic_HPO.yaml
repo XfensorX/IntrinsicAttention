@@ -13,23 +13,15 @@ env_steps: 5000
 search_space:
   seed: ${seed}
   hyperparameters:
-    ppo_learner.minibatch_size: 
-      type: uniform_int
-      lower: 200
-      upper: 1000
     ppo_learner.lr:
       type: uniform_float
       lower: 1e-5
-      upper: 1e-2
+      upper: 1e-1
       log: true
-    intrinsic_learner.minibatch_size:
-      type: uniform_int
-      lower: 200
-      upper: 1000
     intrinsic_learner.lr:
       type: uniform_float
       lower: 1e-5
-      upper: 1e-2
+      upper: 1e-1
       log: true
     intrinsic_learner.intrinsic_reward_coeff:
       type: uniform_float
@@ -40,11 +32,6 @@ search_space:
       type: uniform_int
       lower: 1
       upper: 3
-    training.grad_clip:
-      type: uniform_float
-      lower: 0.01
-      upper: 0.5
-      log: true
     ppo.lambda_:
       type: uniform_float
       lower: 0.9
@@ -105,7 +92,7 @@ ppo_learner:
   lr: 0.01
   num_epochs: 1
   shuffle_batch_per_epoch: true
-  num_learners: 0  
+  num_learners: 0
 
 # Intrinsic Reward Module Config
 intrinsic_learner:
@@ -161,15 +148,15 @@ evaluation:
 
 
 # System resources
-num_cpus_for_main_process: 3
+num_cpus_for_main_process: 2
 data_dir: ./data/Umbrella
 
 
 hydra:
   sweeper:
-    n_trials: 100  
-    budget_variable: env_steps  
-    search_space: ${search_space}               
+    n_trials: 100
+    budget_variable: env_steps
+    search_space: ${search_space}
     sweeper_kwargs:
       optimizer_kwargs:
         scenario:
@@ -180,10 +167,10 @@ hydra:
           deterministic: true
           n_workers: 1
           output_directory: ./tmp/actor_critic_sweep
-        smac_facade: 
+        smac_facade:
           _target_: smac.facade.multi_fidelity_facade.MultiFidelityFacade
           _partial_: true
-        intensifier: 
+        intensifier:
           _target_: smac.facade.multi_fidelity_facade.MultiFidelityFacade.get_intensifier
           _partial_: true
           eta: 3

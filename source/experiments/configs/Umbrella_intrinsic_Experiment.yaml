@@ -4,8 +4,8 @@ defaults:
 hydra:
   sweeper:
     params:
-      seed: 1, 2
-      env.length: 10
+      seed: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      env.length: 5, 10, 20, 50, 100
 
 env:
   name: Umbrella
@@ -21,20 +21,20 @@ ppo_learner:
   lr: 0.01
   num_epochs: 1
   shuffle_batch_per_epoch: true
-  num_learners: 0  
+  num_learners: 0
 
 # Intrinsic Reward Module Config
 intrinsic_learner:
-  minibatch_size: 200
+  minibatch_size: 1000
   shuffle_batch_per_epoch: true
   num_epochs: 2
-  lr: 5.0e-3
-  intrinsic_reward_coeff: 0.1  # Weight of intrinsic rewards
+  lr: 0.001
+  intrinsic_reward_coeff: 0.5  # Weight of intrinsic rewards
 
 # Training settings
 training:
   gamma: 1
-  train_batch_size_per_learner: 1000
+  train_batch_size_per_learner: 5000
   grad_clip: 0.5
 
 # PPO Algorithm Parameters
@@ -74,7 +74,7 @@ evaluation:
   evaluation_num_env_runners: 1
 
 # System resources
-num_cpus_for_main_process: 6 
+num_cpus_for_main_process: 2
 data_dir: ./data/Umbrella
 
 

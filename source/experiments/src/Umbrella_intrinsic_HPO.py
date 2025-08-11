@@ -18,7 +18,7 @@ from source.intrinsic_attention_ppo.algorithm.IntrinsicAttentionPPOHydraConfig i
     IntrinsicAttentionPPOHydraConfig,
 )
 
-ray.init(RAY_memory_monitor_refresh_ms=0)
+ray.init()
 time_path = time.strftime("%Y-%m-%d_%H-%M-%S")
 
 
