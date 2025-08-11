@@ -9,7 +9,7 @@ hydra:
 
 env:
   name: Umbrella
-  length: 100
+  length: 50
 
 # Common Parameters
 seed: 42  # Default seed (overridden by sweeper)
@@ -23,19 +23,10 @@ ppo_learner:
   shuffle_batch_per_epoch: true
   num_learners: 0
 
-# Intrinsic Reward Module Config
-intrinsic_learner:
-  minibatch_size: 1000
-  shuffle_batch_per_epoch: true
-  num_epochs: 2
-  lr: 0.001
-  intrinsic_reward_coeff: 0.5  # Weight of intrinsic rewards
-
 # Training settings
 training:
   gamma: 1
   train_batch_size_per_learner: 5000
-  grad_clip: 0.5
 
 # PPO Algorithm Parameters
 ppo:
@@ -49,12 +40,10 @@ ppo:
   entropy_coeff: 0.0
   clip_param: 0.2
   vf_clip_param: 0.5
-  extrinsic_value_hidden_size_1: 64
-  extrinsic_value_hidden_size_2: 32
-  policy_head_hidden_size: 64
-  value_head_hidden_size: 64
-  embedding_hidden_size: 64
-  embedding_dim: 32
+  grad_clip: 0.5
+  hidden_size_1: 64
+  hidden_size_2: 32
+
 
 # Environment Runner Settings
 env_runners:
@@ -73,8 +62,34 @@ evaluation:
   evaluation_force_reset_envs_before_iteration: true
   evaluation_num_env_runners: 1
 
+
+
 # System resources
-num_cpus_for_main_process: 2
-data_dir: ./experiment_data/UmbrellaIntrinsicAttentionPPO
+num_cpus_for_main_process: 6
+data_dir: ./experiment_data/UmbrellaPPO
+
+
+hydra:
+  sweeper:
+    n_trials: 100
+    budget_variable: env_steps
+    search_space: ${search_space}
+    sweeper_kwargs:
+      optimizer_kwargs:
+        scenario:
+          n_trials: ${hydra.sweeper.n_trials}
+          seed: ${seed}
+          min_budget: 20000
+          max_budget: 100000
+          deterministic: true
+          n_workers: 1
+          output_directory: ./tmp/actor_critic_sweep
+        smac_facade:
+          _target_: smac.facade.multi_fidelity_facade.MultiFidelityFacade
+          _partial_: true
+        intensifier:
+          _target_: smac.facade.multi_fidelity_facade.MultiFidelityFacade.get_intensifier
+          _partial_: true
+          eta: 3
 
 
