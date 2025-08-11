@@ -217,3 +217,5 @@ __marimo__/
 # Ignore all results directories
 **/results/
 results
+**/.DS_Store
+.DS_Store
