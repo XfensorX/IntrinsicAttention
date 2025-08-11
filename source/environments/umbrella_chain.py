@@ -219,7 +219,7 @@ class UmbrellaChainEnv(gym.Env):
                 self._total_regret += 2.0
         else:
             # Intermediate distractor reward (+1 or −1 with equal prob.)
-            reward = float((self.rng.integers(0, 2) * 2 - 1) * 0.1)
+            reward = float((self.rng.integers(0, 2) * 2 - 1) * 0.5)
 
         # Generate next observation (always even on terminal step) --------- #
         self._write_observation()
