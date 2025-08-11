@@ -9,14 +9,14 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import ModuleID, NamedParamDict, TensorType
 
+from intrinsic_attention_ppo.learners.learner_utils.remove_gae_from_learner_connector import (
+    remove_gae_from_learner_connectors,
+)
 from source.intrinsic_attention_ppo.config import (
     INTRINSIC_REWARD_MODULE_ID,
     PPO_AGENT_POLICY_ID,
 )
 from source.intrinsic_attention_ppo.learners.CustomPPOLearner import CustomPPOLearner
-from source.intrinsic_attention_ppo.learners.remove_gae_from_learner_connector import (
-    remove_gae_from_learner_connectors,
-)
 
 torch, nn = try_import_torch()
 

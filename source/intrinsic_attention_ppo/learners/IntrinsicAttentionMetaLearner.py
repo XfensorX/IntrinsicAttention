@@ -10,14 +10,14 @@ from ray.rllib.utils.annotations import override
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.typing import ModuleID, NamedParamDict, ParamDict, TensorType
 
+from intrinsic_attention_ppo.learners.learner_utils.remove_gae_from_learner_connector import (
+    remove_gae_from_learner_connectors,
+)
 from source.intrinsic_attention_ppo.config import (
     INTRINSIC_REWARD_MODULE_ID,
     PPO_AGENT_POLICY_ID,
 )
 from source.intrinsic_attention_ppo.learners.CustomPPOLearner import CustomPPOLearner
-from source.intrinsic_attention_ppo.learners.remove_gae_from_learner_connector import (
-    remove_gae_from_learner_connectors,
-)
 
 torch, nn = try_import_torch()
 
@@ -148,7 +148,7 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner, CustomPPOLearner):
         outer_loop_policies = set(self.module.keys()) - self.get_inner_loop_policies()
 
         outer_loop_params = {
-            mid: p for mid, p in params.items() if mid in outer_loop_policies
+            mid: param for mid, param in params.items() if mid in outer_loop_policies
         }
 
         fwd_out = self._make_functional_call(params, batch)
@@ -165,13 +165,12 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner, CustomPPOLearner):
                     if isinstance(mod, torch.nn.Module):
                         stack.enter_context(mod.no_sync())
             postprocessed_gradients = self.postprocess_gradients(gradients)
+            assert postprocessed_gradients == {}
+            for policy in outer_loop_policies:
+                for name, p in self.module[policy].named_parameters():
+                    p.grad = gradients[policy][name]
 
-            # for policy in outer_loop_policies:
-            #     for name, p in self.module[policy].named_parameters():
-            #         if name in postprocessed_gradients:
-            #             p.grad = postprocessed_gradients[name]
-
-            self.apply_gradients(postprocessed_gradients)
+            self.apply_gradients({})
 
         self.update_gradients_from_inner_loop(params)
         return (
