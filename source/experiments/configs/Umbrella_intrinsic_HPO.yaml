@@ -18,15 +18,7 @@ search_space:
       lower: 1e-5
       upper: 1e-1
       log: true
-    # Change Search Space to make HPO feasible
-    ppo_learner.minibatch_size:
-      type: uniform_int
-      lower: 400
-      upper: 1000
-    intrinsic_learner.minibatch_size:
-      type: uniform_int
-      lower: 400
-      upper: 1000
+    # Minibatch Size not in search space to make HPO feasible
     intrinsic_learner.lr:
       type: uniform_float
       lower: 1e-5
