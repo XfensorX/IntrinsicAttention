@@ -18,6 +18,14 @@ search_space:
       lower: 1e-5
       upper: 1e-1
       log: true
+    ppo_learner.minibatch_size:
+      type: uniform_int
+      lower: 128
+      upper: 1024
+    intrinsic_learner.minibatch_size:
+      type: uniform_int
+      lower: 128
+      upper: 1024
     intrinsic_learner.lr:
       type: uniform_float
       lower: 1e-5
@@ -29,10 +37,6 @@ search_space:
       upper: 1.0
       log: true
     intrinsic_learner.num_epochs:
-      type: uniform_int
-      lower: 1
-      upper: 10
-    ppo_learner.num_epochs:
       type: uniform_int
       lower: 1
       upper: 10
@@ -151,13 +155,13 @@ evaluation:
 
 
 # System resources
-num_cpus_for_main_process: 2
-data_dir: ./data/Umbrella
+num_cpus_for_main_process: 1
+data_dir: ./experiment_data/IntrinsicAttention/HPO
 
 
 hydra:
   sweeper:
-    n_trials: 100
+    n_trials: 200
     budget_variable: env_steps
     search_space: ${search_space}
     sweeper_kwargs:
@@ -169,7 +173,7 @@ hydra:
           max_budget: 100000
           deterministic: true
           n_workers: 1
-          output_directory: ./tmp/actor_critic_sweep
+          output_directory: ./experiment_data/IntrinsicAttention/HPO
         smac_facade:
           _target_: smac.facade.multi_fidelity_facade.MultiFidelityFacade
           _partial_: true

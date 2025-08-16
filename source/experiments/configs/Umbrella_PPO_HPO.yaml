@@ -21,7 +21,11 @@ search_space:
     ppo_learner.num_epochs:
       type: uniform_int
       lower: 1
-      upper: 3
+      upper: 10
+    ppo_learner.minibatch_size:
+      type: uniform_int
+      lower: 128
+      upper: 1024
     ppo.lambda_:
       type: uniform_float
       lower: 0.9
@@ -54,11 +58,11 @@ search_space:
     ppo.hidden_size_1:
       type: uniform_int
       lower: 32
-      upper: 128
+      upper: 256
     ppo.hidden_size_2:
       type: uniform_int
       lower: 32
-      upper: 128
+      upper: 256
 
 # PPO Learner Config
 ppo_learner:
@@ -96,13 +100,12 @@ env_runners:
   num_cpus_per_env_runner: 1
   num_envs_per_env_runner: 1
   gym_env_vectorize_mode: "SYNC"
-  rollout_fragment_length: "auto"
-  batch_mode: "complete_episodes"
+  batch_mode: "truncate_episodes"
 
 # Evaluation Settings
 evaluation:
   evaluation_interval: 1
-  evaluation_duration: 20
+  evaluation_duration: 50
   evaluation_duration_unit: "episodes"
   evaluation_force_reset_envs_before_iteration: true
   evaluation_num_env_runners: 1
@@ -110,13 +113,13 @@ evaluation:
 
 
 # System resources
-num_cpus_for_main_process: 6
-data_dir: ./data/Umbrella
+num_cpus_for_main_process: 1
+data_dir: ./experiment_data/PPO/HPO
 
 
 hydra:
   sweeper:
-    n_trials: 100
+    n_trials: 200
     budget_variable: env_steps
     search_space: ${search_space}
     sweeper_kwargs:
@@ -128,7 +131,7 @@ hydra:
           max_budget: 100000
           deterministic: true
           n_workers: 1
-          output_directory: ./tmp/actor_critic_sweep
+          output_directory: ./experiment_data/PPO/HPO
         smac_facade:
           _target_: smac.facade.multi_fidelity_facade.MultiFidelityFacade
           _partial_: true
