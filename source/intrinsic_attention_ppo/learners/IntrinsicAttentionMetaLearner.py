@@ -189,16 +189,16 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner, CustomPPOLearner):
         self.update_gradients_from_inner_loop(params)
 
         # log an Attention Mask for later analysis.
-        self.metrics.activate_tensor_mode()
-        self.metrics.log_value(
-            key="IntrinsicAttentionMask",
-            value=fwd_out[INTRINSIC_REWARD_MODULE_ID]["attention_weights"][
-                0, 0, 0, :, :
-            ],
-            reduce=None,
-            clear_on_reduce=True,
-        )
-        self.metrics.deactivate_tensor_mode()
+        # self.metrics.activate_tensor_mode()
+        # # self.metrics.log_value(
+        # #     key="IntrinsicAttentionMask",
+        # #     value=fwd_out[INTRINSIC_REWARD_MODULE_ID]["attention_weights"][
+        # #         0, 0, 0, :, :
+        # #     ],
+        # #     reduce=None,
+        # #     clear_on_reduce=True,
+        # # )
+        # self.metrics.deactivate_tensor_mode()
 
         return (
             fwd_out,
