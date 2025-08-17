@@ -63,7 +63,7 @@ class IntrinsicAttentionPPOHydraConfig(DifferentiableAlgorithmConfig, PPOConfig)
             num_cpus_per_env_runner=cfg.env_runners.num_cpus_per_env_runner,
             num_envs_per_env_runner=cfg.env_runners.num_envs_per_env_runner,
             gym_env_vectorize_mode=cfg.env_runners.gym_env_vectorize_mode,
-            rollout_fragment_length=cfg.env.length,
+            rollout_fragment_length="auto",
             batch_mode=cfg.env_runners.batch_mode,
         )
         diff_learner_config = DifferentiableLearnerConfig(

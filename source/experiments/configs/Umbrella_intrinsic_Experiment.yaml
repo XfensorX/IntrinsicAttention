@@ -5,11 +5,11 @@ hydra:
   sweeper:
     params:
       seed: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-      env.length: 2, 5, 10, 20, 50
+      env.length: 2, 5, 10, 20, 50, 100, 150
 
 env:
   name: Umbrella
-  length: 100
+  length: 50
 
 # Common Parameters
 seed: 42  # Default seed (overridden by sweeper)
@@ -62,19 +62,18 @@ env_runners:
   num_cpus_per_env_runner: 1
   num_envs_per_env_runner: 1
   gym_env_vectorize_mode: "SYNC"
-  rollout_fragment_length: "auto"
-  batch_mode: "complete_episodes"
+  batch_mode: "truncate_episodes"
 
 # Evaluation Settings
 evaluation:
   evaluation_interval: 1
-  evaluation_duration: 20
+  evaluation_duration: 50
   evaluation_duration_unit: "episodes"
   evaluation_force_reset_envs_before_iteration: true
   evaluation_num_env_runners: 1
 
 # System resources
-num_cpus_for_main_process: 2
-data_dir: ./experiment_data/UmbrellaIntrinsicAttentionPPO
+num_cpus_for_main_process: 1
+data_dir: ./experiment_data/IntrinsicAttention
 
 

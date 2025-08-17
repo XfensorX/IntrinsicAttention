@@ -19,6 +19,10 @@ from source.intrinsic_attention_ppo.algorithm.IntrinsicAttentionPPOHydraConfig i
 
 ray.init()
 time_path = time.strftime("%Y-%m-%d_%H-%M-%S")
+tune.register_env(
+    "Umbrella",
+    lambda env_config: UmbrellaChainEnv(env_config["length"], seed=env_config["seed"]),
+)
 
 
 @hydra.main(
@@ -27,9 +31,6 @@ time_path = time.strftime("%Y-%m-%d_%H-%M-%S")
     version_base="1.1",
 )
 def main(cfg: DictConfig) -> None:
-    tune.register_env(
-        cfg.env.name, lambda _: UmbrellaChainEnv(cfg.env.length, seed=cfg.seed)
-    )
     config = IntrinsicAttentionPPOHydraConfig(cfg=cfg)
 
     root_path = Path(get_original_cwd())
