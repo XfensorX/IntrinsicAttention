@@ -44,7 +44,9 @@ class IntrinsicAttentionPPOHydraConfig(DifferentiableAlgorithmConfig, PPOConfig)
             algo_class=algo_class or IntrinsicAttentionPPO,
         )
 
-        self.environment(cfg.env.name)
+        self.environment(
+            cfg.env.name, env_config={"length": cfg.env.length, "seed": cfg.seed}
+        )
 
         # Make sure we're using the new API stack
         self.api_stack(
