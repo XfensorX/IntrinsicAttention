@@ -41,7 +41,7 @@ training:
 ppo:
   use_critic: true
   use_gae: true
-  lambda_: 0.9199099375548,
+  lambda_: 0.9199099375548
   use_kl_loss: true
   kl_coeff: 0.1602770048049
   kl_target: 0.0137946827143
