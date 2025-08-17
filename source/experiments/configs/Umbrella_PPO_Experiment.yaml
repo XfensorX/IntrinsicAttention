@@ -17,8 +17,8 @@ env_steps: 100000
 
 # PPO Learner Config
 ppo_learner:
-  minibatch_size: 494
-  lr: 0.000631317558363
+  minibatch_size: 515
+  lr: 0.0027541439213
   num_epochs: 4
   shuffle_batch_per_epoch: true
   num_learners: 0
@@ -32,17 +32,17 @@ training:
 ppo:
   use_critic: true
   use_gae: true
-  lambda_: 0.9772571476659
+  lambda_: 0.95565474084
   use_kl_loss: true
-  kl_coeff: 0.325627658057
-  kl_target: 0.0141406772766
-  vf_loss_coeff: 0.6946008393671
-  entropy_coeff: 0.0034828119666
-  clip_param: 0.1201556002755
-  vf_clip_param: 0.4610211626718
+  kl_coeff: 0.5939852077022
+  kl_target: 0.0137962462363
+  vf_loss_coeff: 0.69270825127
+  entropy_coeff: 0.0018408992081
+  clip_param: 0.1749080237695
+  vf_clip_param: 0.3721230154351
   grad_clip: 0.5
-  hidden_size_1: 146
-  hidden_size_2: 145
+  hidden_size_1: 181
+  hidden_size_2: 69
 
 
 # Environment Runner Settings
