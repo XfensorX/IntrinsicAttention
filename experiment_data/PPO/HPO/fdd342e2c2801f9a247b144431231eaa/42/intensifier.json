@@ -1,0 +1,411 @@
+{
+  "incumbent_ids": [
+    40
+  ],
+  "rejected_config_ids": [
+    2,
+    3,
+    1,
+    5,
+    4,
+    7,
+    8,
+    6,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    9,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    127,
+    128,
+    129,
+    130,
+    131,
+    132,
+    133,
+    134,
+    135,
+    136,
+    137,
+    138,
+    139,
+    140,
+    141,
+    142,
+    143,
+    144,
+    145,
+    146,
+    147,
+    148,
+    149,
+    150,
+    151,
+    152,
+    153,
+    154,
+    155,
+    156,
+    157,
+    158,
+    159,
+    160,
+    161,
+    162,
+    163,
+    164,
+    165,
+    166,
+    167,
+    168,
+    169
+  ],
+  "incumbents_changed": 5,
+  "trajectory": [
+    {
+      "config_ids": [
+        1
+      ],
+      "costs": [
+        -1.5
+      ],
+      "trial": 1,
+      "walltime": 0.0
+    },
+    {
+      "config_ids": [
+        4
+      ],
+      "costs": [
+        -1.9
+      ],
+      "trial": 4,
+      "walltime": 0.0
+    },
+    {
+      "config_ids": [
+        6
+      ],
+      "costs": [
+        -2.5
+      ],
+      "trial": 6,
+      "walltime": 0.0
+    },
+    {
+      "config_ids": [
+        9
+      ],
+      "costs": [
+        -9.9
+      ],
+      "trial": 9,
+      "walltime": 0.0
+    },
+    {
+      "config_ids": [
+        40
+      ],
+      "costs": [
+        -10.1
+      ],
+      "trial": 47,
+      "walltime": 0.0
+    }
+  ],
+  "state": {
+    "tracker": {
+      "0,0": [
+        [
+          0,
+          [
+            {
+              "ppo.clip_param": 0.1846837705627,
+              "ppo.entropy_coeff": 0.0010022619949,
+              "ppo.hidden_size_1": 108,
+              "ppo.hidden_size_2": 44,
+              "ppo.kl_coeff": 0.2082301093321,
+              "ppo.kl_target": 0.0298593759587,
+              "ppo.lambda_": 0.9334815255885,
+              "ppo.vf_clip_param": 0.3002855173008,
+              "ppo.vf_loss_coeff": 0.5139135097974,
+              "ppo_learner.lr": 0.006680188115,
+              "ppo_learner.minibatch_size": 604,
+              "ppo_learner.num_epochs": 3
+            },
+            {
+              "ppo.clip_param": 0.227052265501,
+              "ppo.entropy_coeff": 0.0012038580371,
+              "ppo.hidden_size_1": 124,
+              "ppo.hidden_size_2": 34,
+              "ppo.kl_coeff": 0.6897857465777,
+              "ppo.kl_target": 0.0105127229836,
+              "ppo.lambda_": 0.9523707003758,
+              "ppo.vf_clip_param": 0.4107810884493,
+              "ppo.vf_loss_coeff": 0.5009973138603,
+              "ppo_learner.lr": 0.0131655088611,
+              "ppo_learner.minibatch_size": 859,
+              "ppo_learner.num_epochs": 10
+            },
+            {
+              "ppo.clip_param": 0.2092978145736,
+              "ppo.entropy_coeff": 0.0012198254152,
+              "ppo.hidden_size_1": 114,
+              "ppo.hidden_size_2": 40,
+              "ppo.kl_coeff": 0.6003197116975,
+              "ppo.kl_target": 0.028960062775,
+              "ppo.lambda_": 0.9367097377074,
+              "ppo.vf_clip_param": 0.301586703041,
+              "ppo.vf_loss_coeff": 0.501726075948,
+              "ppo_learner.lr": 0.006184823208,
+              "ppo_learner.minibatch_size": 463,
+              "ppo_learner.num_epochs": 3
+            }
+          ]
+        ],
+        [
+          0,
+          [
+            {
+              "ppo.clip_param": 0.229758974456,
+              "ppo.entropy_coeff": 0.0011564064021,
+              "ppo.hidden_size_1": 111,
+              "ppo.hidden_size_2": 44,
+              "ppo.kl_coeff": 0.2343458318887,
+              "ppo.kl_target": 0.0260267566149,
+              "ppo.lambda_": 0.9292607104445,
+              "ppo.vf_clip_param": 0.4619056908722,
+              "ppo.vf_loss_coeff": 0.6951170114033,
+              "ppo_learner.lr": 0.0126148885987,
+              "ppo_learner.minibatch_size": 465,
+              "ppo_learner.num_epochs": 7
+            },
+            {
+              "ppo.clip_param": 0.1391290886887,
+              "ppo.entropy_coeff": 0.0166180615575,
+              "ppo.hidden_size_1": 205,
+              "ppo.hidden_size_2": 53,
+              "ppo.kl_coeff": 0.5032594065567,
+              "ppo.kl_target": 0.004923839731,
+              "ppo.lambda_": 0.9436711566311,
+              "ppo.vf_clip_param": 0.3495947058991,
+              "ppo.vf_loss_coeff": 0.7448304949256,
+              "ppo_learner.lr": 1.07117644e-05,
+              "ppo_learner.minibatch_size": 552,
+              "ppo_learner.num_epochs": 4
+            },
+            {
+              "ppo.clip_param": 0.1201556002755,
+              "ppo.entropy_coeff": 0.0057271871627,
+              "ppo.hidden_size_1": 146,
+              "ppo.hidden_size_2": 137,
+              "ppo.kl_coeff": 0.325627658057,
+              "ppo.kl_target": 0.0141406772766,
+              "ppo.lambda_": 0.9772571476659,
+              "ppo.vf_clip_param": 0.3552221006266,
+              "ppo.vf_loss_coeff": 0.6946008393671,
+              "ppo_learner.lr": 0.0790071871377,
+              "ppo_learner.minibatch_size": 491,
+              "ppo_learner.num_epochs": 1
+            }
+          ]
+        ],
+        [
+          0,
+          [
+            {
+              "ppo.clip_param": 0.2157308594451,
+              "ppo.entropy_coeff": 0.0012038580371,
+              "ppo.hidden_size_1": 106,
+              "ppo.hidden_size_2": 43,
+              "ppo.kl_coeff": 0.6897857465777,
+              "ppo.kl_target": 0.0105127229836,
+              "ppo.lambda_": 0.9522742527519,
+              "ppo.vf_clip_param": 0.4107810884493,
+              "ppo.vf_loss_coeff": 0.5009973138603,
+              "ppo_learner.lr": 0.0142046528674,
+              "ppo_learner.minibatch_size": 729,
+              "ppo_learner.num_epochs": 8
+            },
+            {
+              "ppo.clip_param": 0.2677049085595,
+              "ppo.entropy_coeff": 0.0012372205957,
+              "ppo.hidden_size_1": 53,
+              "ppo.hidden_size_2": 34,
+              "ppo.kl_coeff": 0.2589300206598,
+              "ppo.kl_target": 0.019568454328,
+              "ppo.lambda_": 0.9067993497385,
+              "ppo.vf_clip_param": 0.3023190291816,
+              "ppo.vf_loss_coeff": 0.5139412934881,
+              "ppo_learner.lr": 0.0127517416987,
+              "ppo_learner.minibatch_size": 791,
+              "ppo_learner.num_epochs": 10
+            },
+            {
+              "ppo.clip_param": 0.2646566076809,
+              "ppo.entropy_coeff": 0.0085576237863,
+              "ppo.hidden_size_1": 149,
+              "ppo.hidden_size_2": 245,
+              "ppo.kl_coeff": 0.8166871391159,
+              "ppo.kl_target": 0.026730025142,
+              "ppo.lambda_": 0.9062306102926,
+              "ppo.vf_clip_param": 0.2936384033418,
+              "ppo.vf_loss_coeff": 0.5699305906375,
+              "ppo_learner.lr": 0.0002323188089,
+              "ppo_learner.minibatch_size": 427,
+              "ppo_learner.num_epochs": 1
+            }
+          ]
+        ]
+      ],
+      "1,0": [
+        [
+          0,
+          [
+            {
+              "ppo.clip_param": 0.2153306953298,
+              "ppo.entropy_coeff": 0.0011055167277,
+              "ppo.hidden_size_1": 101,
+              "ppo.hidden_size_2": 40,
+              "ppo.kl_coeff": 0.6108751230638,
+              "ppo.kl_target": 0.0278086152966,
+              "ppo.lambda_": 0.9367097377074,
+              "ppo.vf_clip_param": 0.3183636387897,
+              "ppo.vf_loss_coeff": 0.501726075948,
+              "ppo_learner.lr": 0.0057995354923,
+              "ppo_learner.minibatch_size": 463,
+              "ppo_learner.num_epochs": 4
+            },
+            {
+              "ppo.clip_param": 0.2275465795481,
+              "ppo.entropy_coeff": 0.0010837980781,
+              "ppo.hidden_size_1": 89,
+              "ppo.hidden_size_2": 33,
+              "ppo.kl_coeff": 0.2118639548496,
+              "ppo.kl_target": 0.0192054721827,
+              "ppo.lambda_": 0.924933283736,
+              "ppo.vf_clip_param": 0.1957926789792,
+              "ppo.vf_loss_coeff": 0.5251486017882,
+              "ppo_learner.lr": 0.0064978639835,
+              "ppo_learner.minibatch_size": 920,
+              "ppo_learner.num_epochs": 2
+            }
+          ]
+        ]
+      ]
+    },
+    "next_bracket": 0
+  }
+}
