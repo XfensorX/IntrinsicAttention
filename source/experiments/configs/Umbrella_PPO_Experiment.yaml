@@ -26,7 +26,7 @@ ppo_learner:
 # Training settings
 training:
   gamma: 1
-  train_batch_size_per_learner: 5000
+  train_batch_size_per_learner: 2000
 
 # PPO Algorithm Parameters
 ppo:
