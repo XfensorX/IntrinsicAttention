@@ -4,7 +4,7 @@ defaults:
 
 env:
   name: Umbrella
-  length: 50
+  length: 20
 
 # Common Parameters
 seed: 42  # Default seed (overridden by sweeper)
@@ -66,7 +66,7 @@ search_space:
 
 # PPO Learner Config
 ppo_learner:
-  minibatch_size: 1000
+  minibatch_size: 500
   lr: 0.01
   num_epochs: 1
   shuffle_batch_per_epoch: true
@@ -75,7 +75,7 @@ ppo_learner:
 # Training settings
 training:
   gamma: 1
-  train_batch_size_per_learner: 5000
+  train_batch_size_per_learner: 2000
 
 # PPO Algorithm Parameters
 ppo:
@@ -119,7 +119,7 @@ data_dir: ./experiment_data/PPO/HPO
 
 hydra:
   sweeper:
-    n_trials: 200
+    n_trials: 100
     budget_variable: env_steps
     search_space: ${search_space}
     sweeper_kwargs:

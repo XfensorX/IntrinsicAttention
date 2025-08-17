@@ -4,7 +4,7 @@ defaults:
 
 env:
   name: Umbrella
-  length: 50
+  length: 20
 
 # Common Parameters
 seed: 42  # Default seed (overridden by sweeper)
@@ -33,7 +33,7 @@ search_space:
     intrinsic_learner.num_epochs:
       type: uniform_int
       lower: 1
-      upper: 5
+      upper: 10
     ppo.lambda_:
       type: uniform_float
       lower: 0.9
@@ -90,7 +90,7 @@ search_space:
 
 # PPO Learner Config
 ppo_learner:
-  minibatch_size: 1000
+  minibatch_size: 500
   lr: 0.01
   num_epochs: 1
   shuffle_batch_per_epoch: true
@@ -107,7 +107,7 @@ intrinsic_learner:
 # Training settings
 training:
   gamma: 1
-  train_batch_size_per_learner: 5000
+  train_batch_size_per_learner: 2000
   grad_clip: 0.5
 
 # PPO Algorithm Parameters
@@ -155,7 +155,7 @@ data_dir: ./experiment_data/IntrinsicAttention/HPO
 
 hydra:
   sweeper:
-    n_trials: 200
+    n_trials: 100
     budget_variable: env_steps
     search_space: ${search_space}
     sweeper_kwargs:
