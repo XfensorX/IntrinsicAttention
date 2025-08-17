@@ -4,8 +4,8 @@ defaults:
 hydra:
   sweeper:
     params:
-      seed: 42
-      env.length: 20
+      seed: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      env.length: 2, 5, 10, 20, 50, 100, 150, 200
 
 env:
   name: Umbrella
@@ -64,7 +64,7 @@ evaluation:
 
 # System resources
 num_cpus_for_main_process: 1
-data_dir: ./experiment/PPO/
+data_dir: ./experiment_data/PPO/
 
 
 
