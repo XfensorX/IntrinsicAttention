@@ -11,6 +11,7 @@ from typing import Any, Dict, List
 import contextlib
 
 from ray.rllib.algorithms.algorithm_config import AlgorithmConfig
+from ray.rllib.core.columns import Columns
 from ray.rllib.core.learner.torch.torch_learner import TorchLearner
 from ray.rllib.core.learner.torch.torch_meta_learner import TorchMetaLearner
 from ray.rllib.policy.sample_batch import MultiAgentBatch
@@ -189,16 +190,40 @@ class IntrinsicAttentionMetaLearner(TorchMetaLearner, CustomPPOLearner):
         self.update_gradients_from_inner_loop(params)
 
         # log an Attention Mask for later analysis.
-        # self.metrics.activate_tensor_mode()
-        # # self.metrics.log_value(
-        # #     key="IntrinsicAttentionMask",
-        # #     value=fwd_out[INTRINSIC_REWARD_MODULE_ID]["attention_weights"][
-        # #         0, 0, 0, :, :
-        # #     ],
-        # #     reduce=None,
-        # #     clear_on_reduce=True,
-        # # )
-        # self.metrics.deactivate_tensor_mode()
+        self.metrics.activate_tensor_mode()
+        self.metrics.log_value(
+            key="IntrinsicAttentionMask",
+            value=fwd_out[INTRINSIC_REWARD_MODULE_ID]["attention_weights"][
+                0, 0, 0, :, :
+            ],
+            reduce=None,
+            clear_on_reduce=True,
+        )
+
+        rewards = batch[INTRINSIC_REWARD_MODULE_ID][Columns.REWARDS]  # [B, T]
+        intrinsic = fwd_out[INTRINSIC_REWARD_MODULE_ID][
+            Columns.INTRINSIC_REWARDS
+        ]  # [B, T]
+
+        sum_last_two = rewards[:, -2:].sum(dim=1)
+        pos_mask = sum_last_two >= 0
+        neg_mask = sum_last_two <= 0
+
+        self.metrics.log_value(
+            key="IntrinsicRewardsPositive",
+            value=intrinsic[pos_mask].mean(dim=0),
+            reduce=None,
+            clear_on_reduce=True,
+        )
+
+        self.metrics.log_value(
+            key="IntrinsicRewardsNegative",
+            value=intrinsic[neg_mask].mean(dim=0),
+            reduce=None,
+            clear_on_reduce=True,
+        )
+
+        self.metrics.deactivate_tensor_mode()
 
         return (
             fwd_out,
