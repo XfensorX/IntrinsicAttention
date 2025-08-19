@@ -1,0 +1,260 @@
+{
+  "incumbent_ids": [
+    1
+  ],
+  "rejected_config_ids": [
+    2,
+    3,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    4,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85
+  ],
+  "incumbents_changed": 3,
+  "trajectory": [
+    {
+      "config_ids": [
+        1
+      ],
+      "costs": [
+        -7.12
+      ],
+      "trial": 1,
+      "walltime": 0.0
+    },
+    {
+      "config_ids": [
+        4
+      ],
+      "costs": [
+        -9.92
+      ],
+      "trial": 4,
+      "walltime": 0.0
+    },
+    {
+      "config_ids": [
+        1
+      ],
+      "costs": [
+        -10.32
+      ],
+      "trial": 14,
+      "walltime": 0.0
+    }
+  ],
+  "state": {
+    "tracker": {
+      "0,0": [
+        [
+          0,
+          [
+            {
+              "ppo.clip_param": 0.2982248282566,
+              "ppo.entropy_coeff": 0.0012732101751,
+              "ppo.hidden_size_1": 144,
+              "ppo.hidden_size_2": 94,
+              "ppo.kl_coeff": 0.480368703037,
+              "ppo.kl_target": 0.0068467532955,
+              "ppo.lambda_": 0.9016418692026,
+              "ppo.vf_clip_param": 0.1448555816817,
+              "ppo.vf_loss_coeff": 0.9948444916774,
+              "ppo_learner.lr": 0.0225116561006,
+              "ppo_learner.minibatch_size": 806,
+              "ppo_learner.num_epochs": 8
+            },
+            {
+              "ppo.clip_param": 0.1602342208438,
+              "ppo.entropy_coeff": 0.0424076950618,
+              "ppo.hidden_size_1": 202,
+              "ppo.hidden_size_2": 165,
+              "ppo.kl_coeff": 0.5739037292324,
+              "ppo.kl_target": 0.0296314825275,
+              "ppo.lambda_": 0.9006602928803,
+              "ppo.vf_clip_param": 0.118546586224,
+              "ppo.vf_loss_coeff": 0.9511218267943,
+              "ppo_learner.lr": 0.0348471476685,
+              "ppo_learner.minibatch_size": 968,
+              "ppo_learner.num_epochs": 10
+            },
+            {
+              "ppo.clip_param": 0.283705110714,
+              "ppo.entropy_coeff": 0.0167650211067,
+              "ppo.hidden_size_1": 148,
+              "ppo.hidden_size_2": 125,
+              "ppo.kl_coeff": 0.594420150408,
+              "ppo.kl_target": 0.0126220383459,
+              "ppo.lambda_": 0.9014316713293,
+              "ppo.vf_clip_param": 0.4515533749129,
+              "ppo.vf_loss_coeff": 0.9669099121807,
+              "ppo_learner.lr": 0.0294433442338,
+              "ppo_learner.minibatch_size": 862,
+              "ppo_learner.num_epochs": 7
+            }
+          ]
+        ],
+        [
+          0,
+          [
+            {
+              "ppo.clip_param": 0.1749465781464,
+              "ppo.entropy_coeff": 0.0274073661765,
+              "ppo.hidden_size_1": 112,
+              "ppo.hidden_size_2": 131,
+              "ppo.kl_coeff": 0.5986078197694,
+              "ppo.kl_target": 0.0163951081437,
+              "ppo.lambda_": 0.9540458496506,
+              "ppo.vf_clip_param": 0.1672010528246,
+              "ppo.vf_loss_coeff": 0.9900640019034,
+              "ppo_learner.lr": 0.0379248403962,
+              "ppo_learner.minibatch_size": 911,
+              "ppo_learner.num_epochs": 7
+            },
+            {
+              "ppo.clip_param": 0.2001498779147,
+              "ppo.entropy_coeff": 0.0017537080095,
+              "ppo.hidden_size_1": 131,
+              "ppo.hidden_size_2": 73,
+              "ppo.kl_coeff": 0.3183741953465,
+              "ppo.kl_target": 0.018696453416,
+              "ppo.lambda_": 0.9417823239939,
+              "ppo.vf_clip_param": 0.2909177800147,
+              "ppo.vf_loss_coeff": 0.6813992940828,
+              "ppo_learner.lr": 0.0062126299392,
+              "ppo_learner.minibatch_size": 787,
+              "ppo_learner.num_epochs": 5
+            },
+            {
+              "ppo.clip_param": 0.2469899807556,
+              "ppo.entropy_coeff": 0.0022874104683,
+              "ppo.hidden_size_1": 212,
+              "ppo.hidden_size_2": 115,
+              "ppo.kl_coeff": 0.8960595335769,
+              "ppo.kl_target": 0.0172372309213,
+              "ppo.lambda_": 0.9722980620565,
+              "ppo.vf_clip_param": 0.3695929599717,
+              "ppo.vf_loss_coeff": 0.7258873116257,
+              "ppo_learner.lr": 0.000205940934,
+              "ppo_learner.minibatch_size": 648,
+              "ppo_learner.num_epochs": 7
+            }
+          ]
+        ]
+      ],
+      "1,0": [
+        [
+          0,
+          [
+            {
+              "ppo.clip_param": 0.2634198552011,
+              "ppo.entropy_coeff": 0.0159826864697,
+              "ppo.hidden_size_1": 202,
+              "ppo.hidden_size_2": 201,
+              "ppo.kl_coeff": 0.3311191810831,
+              "ppo.kl_target": 0.0097474400703,
+              "ppo.lambda_": 0.9490985595281,
+              "ppo.vf_clip_param": 0.1298548340141,
+              "ppo.vf_loss_coeff": 0.8785734087947,
+              "ppo_learner.lr": 0.0001739069162,
+              "ppo_learner.minibatch_size": 166,
+              "ppo_learner.num_epochs": 6
+            },
+            {
+              "ppo.clip_param": 0.2161242763253,
+              "ppo.entropy_coeff": 0.0011221730179,
+              "ppo.hidden_size_1": 244,
+              "ppo.hidden_size_2": 238,
+              "ppo.kl_coeff": 0.8574310289901,
+              "ppo.kl_target": 0.0080547871373,
+              "ppo.lambda_": 0.9378522123582,
+              "ppo.vf_clip_param": 0.3772647479453,
+              "ppo.vf_loss_coeff": 0.9855543394906,
+              "ppo_learner.lr": 0.0126481502765,
+              "ppo_learner.minibatch_size": 249,
+              "ppo_learner.num_epochs": 10
+            }
+          ]
+        ]
+      ]
+    },
+    "next_bracket": 0
+  }
+}
