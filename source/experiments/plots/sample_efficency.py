@@ -9,8 +9,10 @@ import numpy as np
 from rliable import library as rly
 from rliable import metrics, plot_utils
 
-PPO_DATA = "./experiment_data/UmbrellaPPO"
-INTRINSICATTENTION_DATA = "./experiment_data/UmbrellaIntrinsicAttentionPPO"
+PPO_DATA = "./experiment_data/PPO/Umbrella_PPO_2025-08-17_18-16-28"
+INTRINSICATTENTION_DATA = (
+    "./experiment_data/IntrinsicAttention/Umbrella_IntrinsicPPO_2025-08-17_20-28-42"
+)
 
 
 ## Inspiration from https://colab.research.google.com/drive/1a0pSD-1tWhMmeJeeoyZM1A-HCW3yf1xR?usp=sharing#scrollTo=-xahXi1brHuf ##
@@ -141,7 +143,7 @@ def plot_sample_efficiency_comparison(
             "IntrinsicAttentionPPO": intrinsic_scores,
         }
         # Hardcoded Training Step Size
-        training_steps = np.arange(ppo_scores.shape[2]) * 5000
+        training_steps = np.arange(ppo_scores.shape[2]) * 2000
 
         def iqm(scores):
             """
@@ -169,6 +171,7 @@ def plot_sample_efficiency_comparison(
             f"Sample Efficiency (IQM ± CI): PPO vs IntrinsicAttentionPPO (length={length}) across 10 Seeds"
         )
         ax.legend()
+        ax.set_ylim(ymin=-3, ymax=11)
         ax.grid(True)
         plt.tight_layout()
         plt.savefig(f"{save_dir}/sample_efficiency_length_{length}.png", dpi=300)
@@ -248,6 +251,8 @@ if __name__ == "__main__":
     intrinsic_data = aggregate_by_length(intrinsic_episode_returns)
 
     plot_sample_efficiency_comparison(ppo_data, intrinsic_data)
+
+    plot_sample_efficiency_final_vs_length(ppo_data, intrinsic_data)
 
     print(len(ppo_entries), "PPO entries found")
     print(len(intrinsic_entries), "Intrinsic Attention entries found")

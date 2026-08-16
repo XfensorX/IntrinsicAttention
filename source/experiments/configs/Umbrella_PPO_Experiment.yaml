@@ -5,7 +5,7 @@ hydra:
   sweeper:
     params:
       seed: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-      env.length: 2, 5, 10, 20, 50
+      env.length: 2, 5, 10, 20, 50, 100, 150
 
 env:
   name: Umbrella
@@ -17,32 +17,32 @@ env_steps: 100000
 
 # PPO Learner Config
 ppo_learner:
-  minibatch_size: 1000
-  lr: 0.0002847858517
-  num_epochs: 1
+  minibatch_size: 515
+  lr: 0.0027541439213
+  num_epochs: 4
   shuffle_batch_per_epoch: true
   num_learners: 0
 
 # Training settings
 training:
   gamma: 1
-  train_batch_size_per_learner: 5000
+  train_batch_size_per_learner: 2000
 
 # PPO Algorithm Parameters
 ppo:
   use_critic: true
   use_gae: true
-  lambda_: 0.9099046732075
+  lambda_: 0.95565474084
   use_kl_loss: true
-  kl_coeff: 0.7464963036515
-  kl_target: 0.0270990929592
-  vf_loss_coeff: 0.6688075857018
-  entropy_coeff: 0.0090570820258
-  clip_param: 0.1221781641624
-  vf_clip_param: 0.1027808522125
+  kl_coeff: 0.5939852077022
+  kl_target: 0.0137962462363
+  vf_loss_coeff: 0.69270825127
+  entropy_coeff: 0.0018408992081
+  clip_param: 0.1749080237695
+  vf_clip_param: 0.3721230154351
   grad_clip: 0.5
-  hidden_size_1: 60
-  hidden_size_2: 90
+  hidden_size_1: 181
+  hidden_size_2: 69
 
 
 # Environment Runner Settings
@@ -51,21 +51,20 @@ env_runners:
   num_cpus_per_env_runner: 1
   num_envs_per_env_runner: 1
   gym_env_vectorize_mode: "SYNC"
-  rollout_fragment_length: "auto"
-  batch_mode: "complete_episodes"
+  batch_mode: "truncate_episodes"
 
 # Evaluation Settings
 evaluation:
   evaluation_interval: 1
-  evaluation_duration: 20
+  evaluation_duration: 50
   evaluation_duration_unit: "episodes"
   evaluation_force_reset_envs_before_iteration: true
   evaluation_num_env_runners: 1
 
 
 # System resources
-num_cpus_for_main_process: 2
-data_dir: ./experiment_data/UmbrellaPPO
+num_cpus_for_main_process: 1
+data_dir: ./experiment_data/PPO/
 
 
 

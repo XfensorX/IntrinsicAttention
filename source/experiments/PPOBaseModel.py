@@ -7,7 +7,9 @@ from ray.rllib.core.rl_module.default_model_config import DefaultModelConfig
 def get_ppo_config(cfg: DictConfig) -> PPOConfig:
     config = (
         PPOConfig()
-        .environment(cfg.env.name)
+        .environment(
+            cfg.env.name, env_config={"length": cfg.env.length, "seed": cfg.seed}
+        )
         .framework("torch")
         .api_stack(
             enable_env_runner_and_connector_v2=True,
@@ -49,7 +51,7 @@ def get_ppo_config(cfg: DictConfig) -> PPOConfig:
             num_envs_per_env_runner=cfg.env_runners.num_envs_per_env_runner,
             gym_env_vectorize_mode=cfg.env_runners.gym_env_vectorize_mode,
             num_cpus_per_env_runner=cfg.env_runners.num_cpus_per_env_runner,
-            rollout_fragment_length=cfg.env_runners.rollout_fragment_length,
+            rollout_fragment_length="auto",
             batch_mode=cfg.env_runners.batch_mode,
         )
         .evaluation(

@@ -1,0 +1,51 @@
+Failure # 1 (occurred at 2025-08-17_20-26-11)
+[36mray::IntrinsicAttentionPPO.train()[39m (pid=671003, ip=10.156.0.3, actor_id=bb79f8d9edd4456622bf9bc201000000, repr=IntrinsicAttentionPPO(env=Umbrella; env-runners=0; learners=0; multi-agent=False))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/plink1/IntrinsicAttention/.venv/lib/python3.11/site-packages/ray/tune/trainable/trainable.py", line 331, in train
+    raise skipped from exception_cause(skipped)
+  File "/home/plink1/IntrinsicAttention/.venv/lib/python3.11/site-packages/ray/tune/trainable/trainable.py", line 328, in train
+    result = self.step()
+             ^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/plink1/IntrinsicAttention/.venv/lib/python3.11/site-packages/ray/rllib/algorithms/algorithm.py", line 1035, in step
+    train_results, train_iter_ctx = self._run_one_training_iteration()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/plink1/IntrinsicAttention/.venv/lib/python3.11/site-packages/ray/rllib/algorithms/algorithm.py", line 3352, in _run_one_training_iteration
+    training_step_return_value = self.training_step()
+                                 ^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/plink1/IntrinsicAttention/source/intrinsic_attention_ppo/algorithm/IntrinsicAttentionPPO.py", line 52, in training_step
+    learner_results = self.custom_meta_gradient_update(batch)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/plink1/IntrinsicAttention/source/intrinsic_attention_ppo/algorithm/IntrinsicAttentionPPO.py", line 114, in custom_meta_gradient_update
+    self.learner_group.update(  # THis is actully only the MetaLearner
+  File "/home/plink1/IntrinsicAttention/.venv/lib/python3.11/site-packages/ray/rllib/core/learner/learner_group.py", line 322, in update
+    self._learner.update(
+  File "/home/plink1/IntrinsicAttention/.venv/lib/python3.11/site-packages/ray/rllib/core/learner/torch/torch_meta_learner.py", line 193, in update
+    params, other_loss_per_module, other_results = other.update(
+                                                   ^^^^^^^^^^^^^
+  File "/home/plink1/IntrinsicAttention/.venv/lib/python3.11/site-packages/ray/rllib/core/learner/differentiable_learner.py", line 350, in update
+    fwd_out, loss_per_module, params, _ = self._update(
+                                          ^^^^^^^^^^^^^
+  File "/home/plink1/IntrinsicAttention/.venv/lib/python3.11/site-packages/ray/rllib/core/learner/torch/torch_differentiable_learner.py", line 375, in _update
+    return self._possibly_compiled_update(batch, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/plink1/IntrinsicAttention/.venv/lib/python3.11/site-packages/ray/rllib/core/learner/torch/torch_differentiable_learner.py", line 120, in _uncompiled_update
+    loss_per_module = self.compute_losses(fwd_out=fwd_out, batch=batch)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/plink1/IntrinsicAttention/source/intrinsic_attention_ppo/learners/IntrinsicAttentionPPOLearner.py", line 111, in compute_losses
+    loss = self.compute_ppo_loss(
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/plink1/IntrinsicAttention/source/intrinsic_attention_ppo/learners/CustomPPOLearner.py", line 70, in compute_ppo_loss
+    advantages, value_targets = compute_gae(
+                                ^^^^^^^^^^^^
+  File "/home/plink1/IntrinsicAttention/source/intrinsic_attention_ppo/learners/learner_utils/pytorch_differentiable_funcs.py", line 214, in compute_gae
+    value_targets = compute_value_targets(
+                    ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/plink1/IntrinsicAttention/source/intrinsic_attention_ppo/learners/learner_utils/pytorch_differentiable_funcs.py", line 86, in compute_value_targets
+    intermediates = rewards + gamma * (1.0 - lambda_) * flat_values[1:]
+                                       ~~~~^~~~~~~~~
+TypeError: unsupported operand type(s) for -: 'float' and 'str'
